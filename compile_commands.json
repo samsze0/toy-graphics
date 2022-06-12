@@ -1,0 +1,17 @@
+[
+{
+  "directory": "/Users/mingsumsze/dev/opengl-playground/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++  -I/Users/mingsumsze/dev/opengl-playground/Mult  -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.0.sdk -o CMakeFiles/myexe.dir/main.cpp.o -c /Users/mingsumsze/dev/opengl-playground/main.cpp",
+  "file": "/Users/mingsumsze/dev/opengl-playground/main.cpp"
+},
+{
+  "directory": "/Users/mingsumsze/dev/opengl-playground/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++  -I/Users/mingsumsze/dev/opengl-playground/Mult  -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.0.sdk -o CMakeFiles/myexe.dir/adder.cpp.o -c /Users/mingsumsze/dev/opengl-playground/adder.cpp",
+  "file": "/Users/mingsumsze/dev/opengl-playground/adder.cpp"
+},
+{
+  "directory": "/Users/mingsumsze/dev/opengl-playground/build/Mult",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++    -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.0.sdk -o CMakeFiles/mult.dir/multiplier.cpp.o -c /Users/mingsumsze/dev/opengl-playground/Mult/multiplier.cpp",
+  "file": "/Users/mingsumsze/dev/opengl-playground/Mult/multiplier.cpp"
+}
+]
