@@ -4,11 +4,11 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include "shader.h"
+#include "error.h"
 
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
-	std::cout << "Window resized" << std::endl;
+	GLCheckError(glViewport(0, 0, width, height));
 }
 
 static void processInput(GLFWwindow *window) {
@@ -21,22 +21,21 @@ static void RenderLoop(GLFWwindow* window, unsigned int VAO, Shader shader) {
 		processInput(window);
 
 		// Clear color buffer
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		GLCheckError(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
+		GLCheckError(glClear(GL_COLOR_BUFFER_BIT));
 
-		glUseProgram(shader.ID); 
-		glBindVertexArray(VAO);
+		GLCheckError(glUseProgram(shader.ID)); 
+		GLCheckError(glBindVertexArray(VAO));
 
 		// Uniform
 		float timeValue = glfwGetTime();
-		std::cout << timeValue << std::endl;
 		float blueColorValue = sin(timeValue) / 4.0f + 0.75f;
 		unsigned int vertexColorLocation = glGetUniformLocation(shader.ID, "blueColor");
-		glUniform1f(vertexColorLocation, blueColorValue);
+		GLCheckError(glUniform1f(vertexColorLocation, blueColorValue));
 
 		// With EBO (drawing a rectangle)
 		// Draw mode; no. indicies; type of indicies; offset
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		GLCheckError(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
 
 		// Double buffering
 		glfwSwapBuffers(window);
@@ -94,23 +93,23 @@ int main(void)
 
 	// VAO
 	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	GLCheckError(glGenVertexArrays(1, &VAO));
+	GLCheckError(glBindVertexArray(VAO));
 
 	// VBO
 	unsigned int VBO;
-	glGenBuffers(1, &VBO);
+	GLCheckError(glGenBuffers(1, &VBO));
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, 4 * (2 + 3) * sizeof(float), vertexData, GL_STATIC_DRAW);
+	GLCheckError(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+	GLCheckError(glBufferData(GL_ARRAY_BUFFER, 4 * (2 + 3) * sizeof(float), vertexData, GL_STATIC_DRAW));
 
 	// 0th vertex attrib; 2 GL_FLOAT; not normalised; stride; no offset (require weird cast)
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, (2 + 3) * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+	GLCheckError(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, (2 + 3) * sizeof(float), (void*)0));
+	GLCheckError(glEnableVertexAttribArray(0));
 
 	// 1st vertex attrib; 3 GL_FLOAT; not normalised; stride; no offset (require weird cast)
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (2 + 3) * sizeof(float), (void*)(2 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+	GLCheckError(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (2 + 3) * sizeof(float), (void*)(2 * sizeof(float))));
+	GLCheckError(glEnableVertexAttribArray(1));
 
 	// EBO
 	unsigned int indices[] = {
@@ -119,10 +118,10 @@ int main(void)
 	};
 
 	unsigned int EBO;
-	glGenBuffers(1, &EBO);
+	GLCheckError(glGenBuffers(1, &EBO));
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	GLCheckError(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
+	GLCheckError(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
 
 	// Shader
 	Shader shader = Shader("shader/vertex.vs", "shader/fragment.fs");

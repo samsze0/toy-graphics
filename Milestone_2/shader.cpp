@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "error.h"
 
 
 // lvalue & rvalue. Return string ref instead?
@@ -23,16 +24,16 @@ static unsigned int CompileShader(unsigned int type, const std::string& shaderSo
   const char* shaderSource_cstr = shaderSource.c_str();
 
   // ID; no. strings; shader source; null
-  glShaderSource(shaderObj, 1, &shaderSource_cstr, nullptr);
-  glCompileShader(shaderObj);
+  GLCheckError(glShaderSource(shaderObj, 1, &shaderSource_cstr, nullptr));
+  GLCheckError(glCompileShader(shaderObj));
 
   int success;
-  glGetShaderiv(shaderObj, GL_COMPILE_STATUS, &success);
+  GLCheckError(glGetShaderiv(shaderObj, GL_COMPILE_STATUS, &success));
   if (!success) {
     char infoLog[512];
-    glGetShaderInfoLog(shaderObj, 512, NULL, infoLog);
+    GLCheckError(glGetShaderInfoLog(shaderObj, 512, NULL, infoLog));
     std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    glDeleteShader(shaderObj);
+    GLCheckError(glDeleteShader(shaderObj));
     return -1;
   }
 
@@ -44,14 +45,14 @@ static unsigned int CreateShaderProgram(const std::string& vertexShaderSource, c
   unsigned int vertexShaderObj = CompileShader(GL_VERTEX_SHADER, vertexShaderSource);
   unsigned int fragmentShaderObj = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 
-  glAttachShader(shaderProgram, vertexShaderObj);
-  glAttachShader(shaderProgram, fragmentShaderObj);
-  glLinkProgram(shaderProgram);
-  glValidateProgram(shaderProgram);
+  GLCheckError(glAttachShader(shaderProgram, vertexShaderObj));
+  GLCheckError(glAttachShader(shaderProgram, fragmentShaderObj));
+  GLCheckError(glLinkProgram(shaderProgram));
+  GLCheckError(glValidateProgram(shaderProgram));
 
   // Delete shader objects after link
-  glDeleteShader(vertexShaderObj);
-  glDeleteShader(fragmentShaderObj);
+  GLCheckError(glDeleteShader(vertexShaderObj));
+  GLCheckError(glDeleteShader(fragmentShaderObj));
 
   return shaderProgram;
 }

@@ -20,6 +20,8 @@ add_executable(myexe
   main.cpp
   shader.cpp
   shader.h
+  error.cpp
+  error.h
 )
 
 # External dependencies (dynamic)
