@@ -18,12 +18,6 @@ set (CMAKE_CXX_STANDARD 11)
 # Compile to exe, with all source files
 add_executable(myexe
   main.cpp
-  adder.cpp
-)
-
-# Trigger CMakeLists.txt of subdirectory
-add_subdirectory(
-  Mult
 )
 
 # External dependencies (dynamic)
@@ -39,7 +33,6 @@ add_subdirectory(external/glad)
 
 # Link lib to main
 target_link_libraries(myexe
-  mult
   glfw
   # glew
   GLEW::GLEW
@@ -48,7 +41,6 @@ target_link_libraries(myexe
 
 # Such that include path is independent of project structure
 target_include_directories(myexe
-  PUBLIC Mult/
   PUBLIC external/glfw/include/
   # PUBLIC external/glew/include
   PUBLIC external/glad/include/

@@ -1,5 +1,3 @@
-#include "adder.h"
-#include "multiplier.h"
 #include <iostream>
 // #include <GL/glew.h>
 #include <glad/glad.h>
@@ -59,13 +57,12 @@ static void RenderLoop(GLFWwindow* window) {
 		processInput(window);
 
 		// Clear color buffer
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// With VBO
+		// With VBO (drawing a triangle)
+		// Draw mode; starting index of array; no. verticies
 		glDrawArrays(GL_TRIANGLES, 0, 3);
-
-		// With EBO
-		// glDrawElements(GL_TRIANGLES, 3, );
 
 		// Double buffering
 		glfwSwapBuffers(window);
@@ -116,7 +113,7 @@ int main(void)
 	float vertexData[6] = {
 		-0.5f, -0.5f,
 		 0.0f,  0.5f,
-		 0.5f, -0.5f
+		 0.5f, -0.5f,
 	};
 
 	// VAO
@@ -157,7 +154,9 @@ int main(void)
 		}
 	)glsl";
 	unsigned int shaderProgram = CreateShaderProgram(vertexShaderSource, fragmentShaderSource);
+
 	glUseProgram(shaderProgram); 
+	glBindVertexArray(VAO);
 
 	RenderLoop(window);
 
