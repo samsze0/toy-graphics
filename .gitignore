@@ -39,3 +39,6 @@
 
 # Build
 build/
+
+# Compile commands
+**/compile_commands.json
