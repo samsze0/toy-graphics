@@ -12,6 +12,7 @@ set (CMAKE_CXX_STANDARD 11)
 add_executable(myexe
   main.cpp
   adder.cpp
+  adder.h
 )
 
 # Trigger CMakeLists.txt of subdirectory

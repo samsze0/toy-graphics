@@ -128,8 +128,8 @@ int main(void)
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), vertexData, GL_STATIC_DRAW);
 
-	// 0th vertex attrib; 2 GL_FLOAT; not normalised; stride; no offset
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+	// 0th vertex attrib; 2 GL_FLOAT; not normalised; stride; no offset (require weird cast)
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 	// Shader
