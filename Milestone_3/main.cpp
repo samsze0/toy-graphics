@@ -7,6 +7,8 @@
 #include "error.h"
 #include "vertexBuffer.h"
 #include "indexBuffer.h"
+#include "vertexArray.h"
+#include <vector>
 
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -18,7 +20,7 @@ static void processInput(GLFWwindow *window) {
 		glfwSetWindowShouldClose(window, true);
 }
 
-static void RenderLoop(GLFWwindow* window, unsigned int VAO, Shader shader) {
+static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& shader) {
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
 
@@ -26,8 +28,8 @@ static void RenderLoop(GLFWwindow* window, unsigned int VAO, Shader shader) {
 		GLCheckError(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
 		GLCheckError(glClear(GL_COLOR_BUFFER_BIT));
 
-		GLCheckError(glUseProgram(shader.ID)); 
-		GLCheckError(glBindVertexArray(VAO));
+		shader.use();
+		vertexArray.bind();
 
 		// Uniform
 		float timeValue = glfwGetTime();
@@ -35,9 +37,9 @@ static void RenderLoop(GLFWwindow* window, unsigned int VAO, Shader shader) {
 		unsigned int vertexColorLocation = glGetUniformLocation(shader.ID, "blueColor");
 		GLCheckError(glUniform1f(vertexColorLocation, blueColorValue));
 
-		// With EBO (drawing a rectangle)
-		// Draw mode; no. indicies; type of indicies; offset
-		GLCheckError(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+		// With VBO (drawing a triangle)
+		// Draw mode; starting index of array; no. verticies
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		// Double buffering
 		glfwSwapBuffers(window);
@@ -75,10 +77,6 @@ int main(void)
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	// Initialise GLEW
-	// if (GLEW_OK != glewInit())
-	// 	std::cout << "Error" << std::endl;
-
 	// Initialise GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl
@@ -87,39 +85,22 @@ int main(void)
 
 	float vertexData[] = {
 		 // position   // color
-		 0.5f,  0.5f,  0.2f, 0.3f, 0.8f,  // top right
-		 0.5f, -0.5f,  0.4f, 0.8f, 0.4f,  // bottom right
-		-0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  // bottom left
-		-0.5f,  0.5f,  0.9f, 0.4f, 0.6f,  // top left
+		 -0.5f, -0.5f,  0.2f, 0.3f, 0.8f,  // top right
+		  0.0f,  0.5f,  0.4f, 0.8f, 0.4f,  // bottom right
+		  0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  // bottom left
 	};
 
 	// VAO
-	unsigned int VAO;
-	GLCheckError(glGenVertexArrays(1, &VAO));
-	GLCheckError(glBindVertexArray(VAO));
-
-	// VBO
-	VertexBuffer vertexBuffer = VertexBuffer((void*)vertexData, 4 * (2 + 3) * sizeof(float));
-
-	// 0th vertex attrib; 2 GL_FLOAT; not normalised; stride; no offset (require weird cast)
-	GLCheckError(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, (2 + 3) * sizeof(float), (void*)0));
-	GLCheckError(glEnableVertexAttribArray(0));
-
-	// 1st vertex attrib; 3 GL_FLOAT; not normalised; stride; no offset (require weird cast)
-	GLCheckError(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (2 + 3) * sizeof(float), (void*)(2 * sizeof(float))));
-	GLCheckError(glEnableVertexAttribArray(1));
-
-	// EBO
-	unsigned int indices[] = {
-		0, 1, 3, // first triangle
-		1, 2, 3 // second triangle
+	std::vector<VertexAttrib> vertexAttribs = {
+		VertexAttrib(2),
+		VertexAttrib(3)
 	};
-	IndexBuffer indexBuffer = IndexBuffer((void*)indices, 6);
+	VertexArray vertexArray = VertexArray((void*)vertexData, 4 * (2+3) * sizeof(float), vertexAttribs);
 
 	// Shader
 	Shader shader = Shader("shader/vertex.vs", "shader/fragment.fs");
 
-	RenderLoop(window, VAO, shader);
+	RenderLoop(window, vertexArray, shader);
 
 	return 0;
 }

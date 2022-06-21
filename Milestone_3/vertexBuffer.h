@@ -1,7 +1,9 @@
+#pragma once
+
+
 class VertexBuffer {
-private:
-  unsigned int ID;
 public:
+  unsigned int ID;
   VertexBuffer(const void* vertexData, unsigned int size);
   ~VertexBuffer();
   void Bind() const;

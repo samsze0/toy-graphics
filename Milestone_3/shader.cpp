@@ -63,3 +63,11 @@ Shader::Shader(const std::string& vertexShaderSourcePath, const std::string& fra
 
   this->ID = CreateShaderProgram(vertexShaderSource, fragmentShaderSource);
 }
+
+Shader::~Shader() {
+  GLCheckError(glDeleteProgram(this->ID));
+}
+
+void Shader::use() {
+  GLCheckError(glUseProgram(this->ID));
+}

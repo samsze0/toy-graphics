@@ -1,3 +1,6 @@
+#pragma once
+
+
 class IndexBuffer {
 private:
   unsigned int ID;

@@ -26,6 +26,8 @@ add_executable(myexe
   vertexBuffer.h
   indexBuffer.cpp
   indexBuffer.h
+  vertexArray.cpp
+  vertexArray.h
 )
 
 # External dependencies (dynamic)
