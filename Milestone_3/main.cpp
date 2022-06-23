@@ -8,6 +8,7 @@
 #include "vertexBuffer.h"
 #include "indexBuffer.h"
 #include "vertexArray.h"
+// #include <array>
 #include <vector>
 
 
@@ -83,19 +84,30 @@ int main(void)
 ;		return -1;
 	}
 
+	// Vertex Data
+
 	float vertexData[] = {
-		 // position   // color
+		 // position    // color
 		 -0.5f, -0.5f,  0.2f, 0.3f, 0.8f,  // top right
 		  0.0f,  0.5f,  0.4f, 0.8f, 0.4f,  // bottom right
 		  0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  // bottom left
 	};
 
+	// A bad idea because OpenGL works explicitly with raw array & size
+	// std::vector<float> vertexData= {
+	// 	 // position    // color
+	// 	 -0.5f, -0.5f,  0.2f, 0.3f, 0.8f,  // top right
+	// 	  0.0f,  0.5f,  0.4f, 0.8f, 0.4f,  // bottom right
+	// 	  0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  // bottom left
+	// };
+
 	// VAO
 	std::vector<VertexAttrib> vertexAttribs = {
-		VertexAttrib(2),
-		VertexAttrib(3)
+		VertexAttrib(2),  // no. GL_FLOATS
+		VertexAttrib(3)   // no. GL_FLOATS
 	};
 	VertexArray vertexArray = VertexArray((void*)vertexData, 4 * (2+3) * sizeof(float), vertexAttribs);
+	// VertexArray vertexArray = VertexArray(vertexData, vertexAttribs);
 
 	// Shader
 	Shader shader = Shader("shader/vertex.vs", "shader/fragment.fs");

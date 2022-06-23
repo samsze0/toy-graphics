@@ -10,13 +10,18 @@ VertexAttrib::VertexAttrib(unsigned int count)
   : count(count) {}
 
 
-VertexArray::VertexArray(void* vertexData, unsigned int size, std::vector<VertexAttrib>& vertexAttribs) {
+// Use of constructor initialiser list to prevent vertexBuffer from being constructed by the default constructor
+// Note: implicit conversion only occur at most once
+// vertexBuffer(vertexData, size) is equiv to vertexBuffer = VertexBuffer(vertexData, size)
+// Won't work if vertexBuffer("some string") because vertexBuffer = VertexBuffer(std::string("somestring"))
+VertexArray::VertexArray(void* vertexData, unsigned int size, std::vector<VertexAttrib>& vertexAttribs)
+  : vertexBuffer(vertexData, size) {
   GLCheckError(glGenVertexArrays(1, &(this->ID)));
   GLCheckError(glBindVertexArray(this->ID));
 
-  // VBO
+  // VBO (heap allocation)
 
-  this->vertexBuffer = new VertexBuffer(vertexData, size);  // and require heap allocation & manual de-allocation
+  // this->vertexBuffer = new VertexBuffer(vertexData, size);  // and require manual de-allocation
 
   // Vertex Attribute Pointers
 
@@ -46,7 +51,7 @@ VertexArray::VertexArray(void* vertexData, unsigned int size, std::vector<Vertex
 
 VertexArray::~VertexArray() {
   GLCheckError(glDeleteVertexArrays(1, &(this->ID)));
-  delete this->vertexBuffer;
+  // delete this->vertexBuffer;
 }
 
 void VertexArray::bind() const {
