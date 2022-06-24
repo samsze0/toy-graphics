@@ -14,7 +14,7 @@ VertexAttrib::VertexAttrib(unsigned int count)
 // Note: implicit conversion only occur at most once
 // vertexBuffer(vertexData, size) is equiv to vertexBuffer = VertexBuffer(vertexData, size)
 // Won't work if vertexBuffer("some string") because vertexBuffer = VertexBuffer(std::string("somestring"))
-VertexArray::VertexArray(void* vertexData, unsigned int size, std::vector<VertexAttrib>& vertexAttribs)
+VertexArray::VertexArray(const void* vertexData, unsigned int size, std::vector<VertexAttrib>& vertexAttribs)
   : vertexBuffer(vertexData, size) {
   GLCheckError(glGenVertexArrays(1, &(this->ID)));
   GLCheckError(glBindVertexArray(this->ID));
@@ -49,9 +49,50 @@ VertexArray::VertexArray(void* vertexData, unsigned int size, std::vector<Vertex
   }
 }
 
+VertexArray::VertexArray(const void* vertexData, unsigned int size, const void* indices, unsigned int count, std::vector<VertexAttrib>& vertexAttribs)
+  : vertexBuffer(vertexData, size) {
+  GLCheckError(glGenVertexArrays(1, &(this->ID)));
+  GLCheckError(glBindVertexArray(this->ID));
+
+  // VBO (heap allocation)
+
+  // this->vertexBuffer = new VertexBuffer(vertexData, size);  // and require manual de-allocation
+
+  // Vertex Attribute Pointers
+
+  // Stride: shared
+  // Offset: individual
+
+  // For calculating stride
+  for (unsigned int i = 0; i < vertexAttribs.size(); i++) {
+    VertexAttrib vertexAttrib = vertexAttribs[i];
+
+    this->stride += vertexAttrib.count * sizeof(float);
+  }
+  std::cout << "Stride: " << this->stride << std::endl;
+
+  // For calculuating offset
+  for (unsigned int i = 0; i < vertexAttribs.size(); i++) {
+    VertexAttrib vertexAttrib = vertexAttribs[i];
+
+    std::cout << "Vertex Attrib " << i << " Offset: " << this->offset << std::endl;
+
+    GLCheckError(glVertexAttribPointer(i, vertexAttrib.count, GL_FLOAT, GL_FALSE, this->stride, (void*)(size_t)(this->offset)));
+    GLCheckError(glEnableVertexAttribArray(i));
+
+    this->offset += vertexAttrib.count * sizeof(float);
+  }
+
+  // EBO
+  
+  this->indexBuffer = new IndexBuffer(indices, count);
+}
+
 VertexArray::~VertexArray() {
   GLCheckError(glDeleteVertexArrays(1, &(this->ID)));
   // delete this->vertexBuffer;
+  if (this->indexBuffer != nullptr)
+    delete this->indexBuffer;
 }
 
 void VertexArray::bind() const {

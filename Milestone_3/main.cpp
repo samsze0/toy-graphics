@@ -40,7 +40,11 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 
 		// With VBO (drawing a triangle)
 		// Draw mode; starting index of array; no. verticies
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		// GLCheckError(glDrawArrays(GL_TRIANGLES, 0, 6));
+
+		// With EBO (drawing a rectangle)
+		// Draw mode; no. indices; type of indices; offset
+		GLCheckError(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
 
 		// Double buffering
 		glfwSwapBuffers(window);
@@ -86,12 +90,22 @@ int main(void)
 
 	// Vertex Data
 
-	float vertexData[] = {
-		 // position    // color
-		 -0.5f, -0.5f,  0.2f, 0.3f, 0.8f,  // top right
-		  0.0f,  0.5f,  0.4f, 0.8f, 0.4f,  // bottom right
-		  0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  // bottom left
-	};
+	// float vertexData[] = {
+	// 	 // position    // color
+	// 	 -0.5f, -0.5f,  0.2f, 0.3f, 0.8f,  // top right
+	// 	  0.0f,  0.5f,  0.4f, 0.8f, 0.4f,  // bottom right
+	// 	  0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  // bottom left
+	// };
+
+	// float vertexData[] = {
+	// 	 // position   // color
+	// 	 0.5f,  0.5f,  0.2f, 0.3f, 0.8f,  // top right
+	// 	 0.5f, -0.5f,  0.4f, 0.8f, 0.4f,  // bottom right
+	// 	-0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  // bottom left
+	// 	-0.5f,  0.5f,  0.9f, 0.4f, 0.6f,  // top left
+	// 	 0.5f,  0.5f,  0.2f, 0.3f, 0.8f,  // top right
+	// 	-0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  // bottom left
+	// };
 
 	// A bad idea because OpenGL works explicitly with raw array & size
 	// std::vector<float> vertexData= {
@@ -101,12 +115,26 @@ int main(void)
 	// 	  0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  // bottom left
 	// };
 
+	float vertexData[] = {
+		 // position   // color
+		 0.5f,  0.5f,  0.2f, 0.3f, 0.8f,  // top right
+		 0.5f, -0.5f,  0.4f, 0.8f, 0.4f,  // bottom right
+		-0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  // bottom left
+		-0.5f,  0.5f,  0.9f, 0.4f, 0.6f,  // top left
+	};
+
+	// EBO
+	unsigned int indices[] = {
+		0, 1, 3, // first triangle
+		1, 2, 3 // second triangle
+	};
+
 	// VAO
 	std::vector<VertexAttrib> vertexAttribs = {
 		VertexAttrib(2),  // no. GL_FLOATS
 		VertexAttrib(3)   // no. GL_FLOATS
 	};
-	VertexArray vertexArray = VertexArray((void*)vertexData, 4 * (2+3) * sizeof(float), vertexAttribs);
+	VertexArray vertexArray = VertexArray((void*)vertexData, 4 * (2+3) * sizeof(float), indices, 6, vertexAttribs);
 	// VertexArray vertexArray = VertexArray(vertexData, vertexAttribs);
 
 	// Shader
