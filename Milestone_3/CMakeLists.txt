@@ -13,7 +13,7 @@ project(
   LANGUAGES CXX
 )
 
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 17)
 
 # Compile to exe, with all source files
 add_executable(myexe
@@ -28,6 +28,10 @@ add_executable(myexe
   indexBuffer.h
   vertexArray.cpp
   vertexArray.h
+  vertexAttrib.cpp
+  vertexAttrib.h
+  vertexAttribVector.cpp
+  vertexAttribVector.h
 )
 
 # External dependencies (dynamic)

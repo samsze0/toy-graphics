@@ -10,6 +10,7 @@
 #include "vertexArray.h"
 // #include <array>
 #include <vector>
+#include "vertexAttribVector.h"
 
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -130,11 +131,15 @@ int main(void)
 	};
 
 	// VAO
-	std::vector<VertexAttrib> vertexAttribs = {
-		VertexAttrib(2),  // no. GL_FLOATS
-		VertexAttrib(3)   // no. GL_FLOATS
-	};
-	VertexArray vertexArray = VertexArray((void*)vertexData, 4 * (2+3) * sizeof(float), indices, 6, vertexAttribs);
+	// std::vector<VertexAttrib> vertexAttribs = {
+	// 	VertexAttrib(2, GL_FLOAT, false),  // no. GL_FLOATS
+	// 	VertexAttrib(3, GL_FLOAT, false)   // no. GL_FLOATS
+	// };
+	VertexAttribVector vertexAttribVector;
+	vertexAttribVector.Push<float>(2, false);
+	vertexAttribVector.Push<float>(3, false);
+	// VertexArray vertexArray = VertexArray((void*)vertexData, 4 * (2+3) * sizeof(float), indices, 6, vertexAttribs);
+	VertexArray vertexArray = VertexArray((void*)vertexData, 4 * vertexAttribVector.GetStride(), indices, 6, vertexAttribVector);
 	// VertexArray vertexArray = VertexArray(vertexData, vertexAttribs);
 
 	// Shader

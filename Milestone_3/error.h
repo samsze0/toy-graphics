@@ -7,9 +7,6 @@
   x; \
   assert(GLGetError(#x, __FILE__, __LINE__))
 
-// #define GLCheckError(x)\
-//   x
-
 
 void GLClearError();
 
