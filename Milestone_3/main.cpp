@@ -36,8 +36,9 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 		// Uniform
 		float timeValue = glfwGetTime();
 		float blueColorValue = sin(timeValue) / 4.0f + 0.75f;
-		unsigned int vertexColorLocation = glGetUniformLocation(shader.ID, "blueColor");
-		GLCheckError(glUniform1f(vertexColorLocation, blueColorValue));
+		// unsigned int vertexColorLocation = glGetUniformLocation(shader.ID, "blueColor");
+		// GLCheckError(glUniform1f(vertexColorLocation, blueColorValue));
+		shader.SetUniform1f("blueColor", blueColorValue);
 
 		// With VBO (drawing a triangle)
 		// Draw mode; starting index of array; no. verticies
