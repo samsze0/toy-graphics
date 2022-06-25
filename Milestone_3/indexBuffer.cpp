@@ -3,7 +3,8 @@
 #include <glad/glad.h>
 
 
-IndexBuffer::IndexBuffer(const void* indices, unsigned int count) {
+IndexBuffer::IndexBuffer(const void* indices, unsigned int count)
+  : count(count) {
   GLCheckError(glGenBuffers(1, &(this->ID)));
 
   GLCheckError(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ID));

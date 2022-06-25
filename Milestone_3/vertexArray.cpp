@@ -4,6 +4,7 @@
 #include "vertexBuffer.h"
 #include <iostream>
 #include <memory>
+#include <glad/glad.h>
 
 
 // Use of constructor initialiser list to prevent vertexBuffer from being constructed by the default constructor
@@ -25,7 +26,8 @@ VertexArray::VertexArray(const void* vertexData, unsigned int size, const Vertex
   // Offset: individual
 
   // For calculating stride
-  std::cout << "Stride: " << vertexAttribVector.GetStride() << std::endl;
+  this->stride = vertexAttribVector.GetStride();
+  std::cout << "Stride: " << this->stride << std::endl;
 
   // For calculuating offset
   std::vector<VertexAttrib> elements = vertexAttribVector.GetElements();
@@ -37,7 +39,13 @@ VertexArray::VertexArray(const void* vertexData, unsigned int size, const Vertex
     GLCheckError(glVertexAttribPointer(i, vertexAttrib.count, GL_FLOAT, GL_FALSE, vertexAttribVector.GetStride(), (void*)(size_t)(this->offset)));
     GLCheckError(glEnableVertexAttribArray(i));
 
-    this->offset += elements.size() * sizeof(float);
+    unsigned int sizeOfType;
+    switch(vertexAttrib.type) {
+      case GL_FLOAT: sizeOfType = sizeof(GLfloat);
+      case GL_UNSIGNED_INT: sizeOfType = sizeof(GLuint);
+    }
+
+    this->offset += vertexAttrib.count * sizeOfType;
   }
 }
 
@@ -61,4 +69,16 @@ void VertexArray::bind() const {
 
 void VertexArray::unbind() const {
   GLCheckError(glBindVertexArray(0));
+}
+
+const VertexBuffer& VertexArray::GetVertexBuffer() const {
+  return this->vertexBuffer;
+}
+
+const IndexBuffer* VertexArray::GetIndexBuffer() const {
+  return this->indexBuffer;
+}
+
+unsigned int VertexArray::GetStride() const {
+  return this->stride;
 }

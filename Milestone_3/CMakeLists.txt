@@ -32,6 +32,8 @@ add_executable(myexe
   vertexAttrib.h
   vertexAttribVector.cpp
   vertexAttribVector.h
+  renderer.cpp
+  renderer.h
 )
 
 # External dependencies (dynamic)

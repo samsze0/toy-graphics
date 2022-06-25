@@ -68,8 +68,11 @@ Shader::~Shader() {
   GLCheckError(glDeleteProgram(this->ID));
 }
 
-unsigned int Shader::GetUniformLocation(const std::string& name) const {
-  GLCheckError(unsigned int location = glGetUniformLocation(this->ID, "blueColor"));
+int Shader::GetUniformLocation(const std::string& name) {
+  if (this->UniformLocationCache.find(name) != UniformLocationCache.end())
+    return UniformLocationCache[name];
+
+  GLCheckError(int location = glGetUniformLocation(this->ID, "blueColor"));
   return location;
 }
 
@@ -81,6 +84,6 @@ void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2,
   GLCheckError(glUniform4f(this->GetUniformLocation(name), v0, v1, v2, v3)); 
 }
 
-void Shader::use() {
+void Shader::use() const {
   GLCheckError(glUseProgram(this->ID));
 }

@@ -11,6 +11,7 @@
 // #include <array>
 #include <vector>
 #include "vertexAttribVector.h"
+#include "renderer.h"
 
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -26,12 +27,15 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
 
+		Renderer renderer;
+
 		// Clear color buffer
-		GLCheckError(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
-		GLCheckError(glClear(GL_COLOR_BUFFER_BIT));
+		// GLCheckError(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
+		// GLCheckError(glClear(GL_COLOR_BUFFER_BIT));
+		renderer.Clear(0.1f, 0.1f, 0.2f, 1.0f);
 
 		shader.use();
-		vertexArray.bind();
+		// vertexArray.bind();
 
 		// Uniform
 		float timeValue = glfwGetTime();
@@ -46,7 +50,9 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 
 		// With EBO (drawing a rectangle)
 		// Draw mode; no. indices; type of indices; offset
-		GLCheckError(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+		// GLCheckError(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+
+		renderer.Draw(vertexArray, shader);
 
 		// Double buffering
 		glfwSwapBuffers(window);

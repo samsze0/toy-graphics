@@ -27,4 +27,7 @@ public:
   ~VertexArray();
   void bind() const;
   void unbind() const;
+  const VertexBuffer& GetVertexBuffer() const;
+  const IndexBuffer* GetIndexBuffer() const;
+  unsigned int GetStride() const;
 };

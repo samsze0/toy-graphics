@@ -3,7 +3,8 @@
 #include <glad/glad.h>
 
 
-VertexBuffer::VertexBuffer(const void* vertexData, unsigned int size) {
+VertexBuffer::VertexBuffer(const void* vertexData, unsigned int size)
+  : size(size) {
   GLCheckError(glGenBuffers(1, &(this->ID)));
 
   GLCheckError(glBindBuffer(GL_ARRAY_BUFFER, this->ID));
