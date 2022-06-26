@@ -10,6 +10,48 @@
 #include <vector>
 #include "vertexAttribVector.h"
 #include "renderer.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+#include <stdexcept>
+
+
+struct Image {
+	int width;
+	int height;
+	unsigned char* data;
+};
+
+
+static Image* LoadImage(const std::string& filename) {
+	int width, height, BPP;
+	stbi_set_flip_vertically_on_load(1);
+	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &BPP, 3);
+	if (data == nullptr)
+		throw std::runtime_error("Fail to load image file " + filename);
+	Image* image = new Image({width, height, data});
+	return image;
+}
+
+static unsigned int GenAndBindTexture() {
+	unsigned int ID;
+	glGenTextures(1, &ID);
+	glBindTexture(GL_TEXTURE_2D, ID);
+
+	// set the texture wrapping/filtering options (on currently bound texture)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	return ID;
+}
+
+static void LoadImageToTexture(Image* image) {
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->width, image->height, 0, GL_RGB, GL_UNSIGNED_BYTE, image->data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	stbi_image_free(image->data);  // Ownership problem: not a good idea to free memory in somewhere different from where it is allocated
+	delete image;
+}
 
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -55,10 +97,8 @@ int main(void)
 	GLFWwindow* window;
 
 	// Initialise GLFW
-	if (!glfwInit()) {
-		std::cout << "Failed to initialised GLFW" << std::endl;
-		return -1;
-	}
+	if (!glfwInit())
+		throw std::runtime_error("GLFW: fail to initialise");
 
 	// Version 4.1 core
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -67,28 +107,25 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	// Create window
-	window = glfwCreateWindow(640, 480, "Toy OpenGL", NULL, NULL);
+	window = glfwCreateWindow(640, 640, "Toy OpenGL", NULL, NULL);
 	if (!window) {
 		glfwTerminate();
-		std::cout << "Failed to create window" << std::endl;
-		return -1;
+		throw std::runtime_error("GLFW: fail to create window");
 	}
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	// Initialise GLAD
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cout << "Failed to initialize GLAD" << std::endl
-;		return -1;
-	}
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+		throw std::runtime_error("GLAD: fail to initialise");	
 
 	// Vertex Data
 	float vertexData[] = {
-		 // position   // color
-		 0.5f,  0.5f,  0.2f, 0.3f, 0.8f,  // top right
-		 0.5f, -0.5f,  0.4f, 0.8f, 0.4f,  // bottom right
-		-0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  // bottom left
-		-0.5f,  0.5f,  0.9f, 0.4f, 0.6f,  // top left
+		 // position   // color           // texture coord
+		 0.5f,  0.5f,  0.2f, 0.3f, 0.8f,  1.0f, 1.0f,  // top right
+		 0.5f, -0.5f,  0.4f, 0.8f, 0.4f,  1.0f, 0.0f,  // bottom right
+		-0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  0.0f, 0.0f,  // bottom left
+		-0.5f,  0.5f,  0.9f, 0.4f, 0.6f,  0.0f, 1.0f,  // top left
 	};
 
 	// EBO
@@ -101,10 +138,21 @@ int main(void)
 	VertexAttribVector vertexAttribVector;
 	vertexAttribVector.Push<float>(2, false);
 	vertexAttribVector.Push<float>(3, false);
+	vertexAttribVector.Push<float>(2, false);
 	VertexArray vertexArray = VertexArray((void*)vertexData, 4 * vertexAttribVector.GetStride(), indices, 6, vertexAttribVector);
 
 	// Shader
 	Shader shader = Shader("shader/vertex.vs", "shader/fragment.fs");
+
+	// Padding/alignment issue: OpenGL expects row of pixels to be padded to a multiple of 4 bytes
+	// https://stackoverflow.com/questions/15983607/opengl-texture-tilted
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	// Texture
+	// Image* image = LoadImage("asset/smile.png");
+	Image* image = LoadImage("asset/opengl.png");
+	unsigned int textureID = GenAndBindTexture();
+	LoadImageToTexture(image);
 
 	RenderLoop(window, vertexArray, shader);
 

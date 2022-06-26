@@ -35,16 +35,19 @@ find_package(GLEW REQUIRED)
 # External dependencies (static)
 add_subdirectory(external/glfw)
 add_subdirectory(external/glad)
+add_subdirectory(external/stb)
 
 
 # Link lib to main
 target_link_libraries(myexe
-  glfw
-  glad
+  PRIVATE glfw
+  PRIVATE glad
+  PRIVATE stb
 )
 
 # Such that include path is independent of project structure
 target_include_directories(myexe
-  PUBLIC external/glfw/include/
-  PUBLIC external/glad/include/
+  PRIVATE external/glfw/include/
+  PRIVATE external/glad/include/
+  PRIVATE external/stb/include/
 )
