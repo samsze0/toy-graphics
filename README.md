@@ -1,7 +1,12 @@
-Wishing to toy with the following:
+Wishing to toy with the following
 - CMake
 - C++
 - OpenGL
+
+TODO
+- CMake visibility options
+- OpenGL texture. Loading/alignment
+- C++ template specialisation & good practice
 
 Resources
 - CMake official docs

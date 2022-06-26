@@ -24,7 +24,8 @@ struct Image {
 
 static Image* LoadImage(const std::string& filename) {
 	int width, height, BPP;
-	stbi_set_flip_vertically_on_load(1);
+	stbi_set_flip_vertically_on_load(true);
+	// Fill width, height, & bit-per-pixel. No. color channels
 	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &BPP, 3);
 	if (data == nullptr)
 		throw std::runtime_error("Fail to load image file " + filename);
@@ -32,23 +33,32 @@ static Image* LoadImage(const std::string& filename) {
 	return image;
 }
 
-static unsigned int GenAndBindTexture() {
+static unsigned int GenAndBindTexture(unsigned int slot) {
 	unsigned int ID;
-	glGenTextures(1, &ID);
-	glBindTexture(GL_TEXTURE_2D, ID);
+	GLCheckError(glGenTextures(1, &ID));
+	GLCheckError(glActiveTexture(GL_TEXTURE0 + slot));  // implicit ; GL_TEXTURE0 is activated by default
+																							 				// texture unit - "slot" of texture
+																											// "slots" enum are consecutive
+	GLCheckError(glBindTexture(GL_TEXTURE_2D, ID));     // bind to the active texture unit
 
 	// set the texture wrapping/filtering options (on currently bound texture)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+	GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+	GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+	// With mipmap
+	// GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
+	// GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
+	// GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
+	// GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+ 	GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
 	return ID;
 }
 
 static void LoadImageToTexture(Image* image) {
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->width, image->height, 0, GL_RGB, GL_UNSIGNED_BYTE, image->data);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	// Texture target ; Mipmap level ; Storage format of texture ; width & height of texture ; 0 ; Source image format ; Image data
+	GLCheckError(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->width, image->height, 0, GL_RGB, GL_UNSIGNED_BYTE, image->data));
+	GLCheckError(glGenerateMipmap(GL_TEXTURE_2D));  // Optional. Automatically generate all mipmaps
 	stbi_image_free(image->data);  // Ownership problem: not a good idea to free memory in somewhere different from where it is allocated
 	delete image;
 }
@@ -79,6 +89,8 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 		float timeValue = glfwGetTime();
 		float blueColorValue = sin(timeValue) / 4.0f + 0.75f;
 		shader.SetUniform1f("blueColor", blueColorValue);
+		shader.SetUniform1i("Texture1", 0);  // implicit ; default active texture unit is 0 hence its location is default
+		shader.SetUniform1i("Texture2", 1);
 
 		renderer.Draw(vertexArray, shader);
 
@@ -149,10 +161,14 @@ int main(void)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	// Texture
-	// Image* image = LoadImage("asset/smile.png");
-	Image* image = LoadImage("asset/opengl.png");
-	unsigned int textureID = GenAndBindTexture();
-	LoadImageToTexture(image);
+
+	Image* image1 = LoadImage("asset/opengl.png");
+	unsigned int texture1ID = GenAndBindTexture(0);
+	LoadImageToTexture(image1);
+
+	Image* image2 = LoadImage("asset/smile.png");
+	unsigned int texture2ID = GenAndBindTexture(1);
+	LoadImageToTexture(image2);
 
 	RenderLoop(window, vertexArray, shader);
 
