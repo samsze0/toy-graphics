@@ -13,55 +13,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <stdexcept>
-
-
-struct Image {
-	int width;
-	int height;
-	unsigned char* data;
-};
-
-
-static Image* LoadImage(const std::string& filename) {
-	int width, height, BPP;
-	stbi_set_flip_vertically_on_load(true);
-	// Fill width, height, & bit-per-pixel. No. color channels
-	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &BPP, 3);
-	if (data == nullptr)
-		throw std::runtime_error("Fail to load image file " + filename);
-	Image* image = new Image({width, height, data});
-	return image;
-}
-
-static unsigned int GenAndBindTexture(unsigned int slot) {
-	unsigned int ID;
-	GLCheckError(glGenTextures(1, &ID));
-	GLCheckError(glActiveTexture(GL_TEXTURE0 + slot));  // implicit ; GL_TEXTURE0 is activated by default
-																							 				// texture unit - "slot" of texture
-																											// "slots" enum are consecutive
-	GLCheckError(glBindTexture(GL_TEXTURE_2D, ID));     // bind to the active texture unit
-
-	// set the texture wrapping/filtering options (on currently bound texture)
-	GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-	GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-	GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-	// With mipmap
-	// GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
-	// GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
-	// GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
-	// GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
- 	GLCheckError(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-
-	return ID;
-}
-
-static void LoadImageToTexture(Image* image) {
-	// Texture target ; Mipmap level ; Storage format of texture ; width & height of texture ; 0 ; Source image format ; Image data
-	GLCheckError(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->width, image->height, 0, GL_RGB, GL_UNSIGNED_BYTE, image->data));
-	GLCheckError(glGenerateMipmap(GL_TEXTURE_2D));  // Optional. Automatically generate all mipmaps
-	stbi_image_free(image->data);  // Ownership problem: not a good idea to free memory in somewhere different from where it is allocated
-	delete image;
-}
+#include "texture.h"
 
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -161,14 +113,8 @@ int main(void)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	// Texture
-
-	Image* image1 = LoadImage("asset/opengl.png");
-	unsigned int texture1ID = GenAndBindTexture(0);
-	LoadImageToTexture(image1);
-
-	Image* image2 = LoadImage("asset/smile.png");
-	unsigned int texture2ID = GenAndBindTexture(1);
-	LoadImageToTexture(image2);
+	Texture texture1("asset/opengl.png", 0);
+	Texture texture2("asset/smile.png", 1);
 
 	RenderLoop(window, vertexArray, shader);
 
