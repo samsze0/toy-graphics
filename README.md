@@ -9,3 +9,4 @@ Resources
 - learnopengl
 - Cherno's C++ & OpenGL series
 - docs.gl
+- [Microsoft C++ Ref](https://docs.microsoft.com/en-us/cpp/cpp/cpp-language-reference?view=msvc-170)
