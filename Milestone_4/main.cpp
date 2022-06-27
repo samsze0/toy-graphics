@@ -39,8 +39,13 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 
 		// Uniform
 		float timeValue = glfwGetTime();
-		float blueColorValue = sin(timeValue) / 4.0f + 0.75f;
-		shader.SetUniform1f("blueColor", blueColorValue);
+
+		float mixRatio = sin(timeValue * 2) / 2.0f + 0.5f;
+		shader.SetUniform1f("mixRatio", mixRatio);
+
+		float Opacity = sin(timeValue * 3) / 2.0f + 0.5f;
+		shader.SetUniform1f("opacity", Opacity);
+
 		shader.SetUniform1i("Texture1", 0);  // implicit ; default active texture unit is 0 hence its location is default
 		shader.SetUniform1i("Texture2", 1);
 
@@ -115,6 +120,10 @@ int main(void)
 	// Texture
 	Texture texture1("asset/opengl.png", 0);
 	Texture texture2("asset/smile.png", 1);
+
+	// Blending
+	GLCheckError(glEnable(GL_BLEND));
+	GLCheckError(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 	RenderLoop(window, vertexArray, shader);
 

@@ -7,6 +7,9 @@ TODO
 - CMake visibility options
 - OpenGL texture. Loading/alignment
 - C++ template specialisation & good practice
+- C++ filestream, stringstream
+- C++ smart pointer
+- C++ copy constructor, move semantics
 
 Resources
 - CMake official docs
