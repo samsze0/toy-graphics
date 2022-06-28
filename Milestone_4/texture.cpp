@@ -3,7 +3,6 @@
 #include <stb_image.h>
 #include <stdexcept>
 #include <glad/glad.h>
-#include <string>
 
 
 Texture::Texture(const std::string& filepath, unsigned int slot) {
@@ -39,7 +38,7 @@ Texture::Texture(const std::string& filepath, unsigned int slot) {
 
   // LoadImageToTexture
 
-  // Texture target ; Mipmap level ; Storage format of texture ; width & height of texture ; 0 ; Source image format ; Image data
+  // Texture target ; Mipmap level ; Storage format of texture ; width & height of texture ; border width ; Source image format ; Image data
   GLCheckError(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
   GLCheckError(glGenerateMipmap(GL_TEXTURE_2D));  // Optional. Automatically generate all mipmaps
   stbi_image_free(data);  // Ownership problem: not a good idea to free memory in somewhere different from where it is allocated

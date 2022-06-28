@@ -15,8 +15,8 @@ void main() {
   fragColor = mix(
     texture(Texture1, texCoord),
     texture(Texture2, texCoord),
-    1
-    // mixRatio
+    // 1
+    mixRatio
   );  // 80% of first color & 20% of second
-  fragColor.a = opacity;
+  // fragColor.a = opacity;
 }

@@ -93,6 +93,11 @@ void Shader::SetUniform1i(const std::string& name, int v0) {
   GLCheckError(glUniform1i(this->GetUniformLocation(name), v0));
 }
 
+void Shader::SetUniformMatrix4fv(const std::string& name, const glm::mat4& mat) {
+  // glUniformMatrix4fv(name, matrix_count, transpose?, array)
+  GLCheckError(glUniformMatrix4fv(this->GetUniformLocation(name), 1, GL_FALSE, &mat[0][0]));
+}
+
 void Shader::use() const {
   GLCheckError(glUseProgram(this->ID));
 }

@@ -14,6 +14,10 @@
 #include <stb_image.h>
 #include <stdexcept>
 #include "texture.h"
+// GLM: header-only maths lib ; OpenGL specific. Column-major ordering for matrices
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -37,17 +41,26 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 		shader.use();
 		vertexArray.bind();
 
-		// Uniform
+		// Uniform (because some uniforms change with time hence place inside renderloop)
 		float timeValue = glfwGetTime();
 
 		float mixRatio = sin(timeValue * 2) / 2.0f + 0.5f;
 		shader.SetUniform1f("mixRatio", mixRatio);
 
-		float Opacity = sin(timeValue * 3) / 2.0f + 0.5f;
+		float Opacity = sin(timeValue * 2) / 2.0f + 0.5f;
 		shader.SetUniform1f("opacity", Opacity);
 
-		shader.SetUniform1i("Texture1", 0);  // implicit ; default active texture unit is 0 hence its location is default
-		shader.SetUniform1i("Texture2", 1);
+		// MVP
+		// 4x4 identity matrix (diagonal values = 1)
+		glm::mat4 MVP = glm::mat4(1.0f);
+		// Rotate matrix by z-axis
+		MVP = glm::rotate(MVP, glm::radians(sin(timeValue * 2) * 90), glm::vec3(0.0, 0.0, 1.0));
+		// Scale matrix by 0.5 in all dimensions
+		MVP = glm::scale(MVP, glm::vec3(0.5, 0.5, 0.5));
+		// Translate matrix
+		MVP = glm::translate(MVP, glm::vec3(sin(timeValue), cos(timeValue), 0.0f));
+
+	shader.SetUniformMatrix4fv("MVP", MVP);
 
 		renderer.Draw(vertexArray, shader);
 
@@ -89,6 +102,7 @@ int main(void)
 		throw std::runtime_error("GLAD: fail to initialise");	
 
 	// Vertex Data
+	// Defining vertex position in world coord
 	float vertexData[] = {
 		 // position   // color           // texture coord
 		 0.5f,  0.5f,  0.2f, 0.3f, 0.8f,  1.0f, 1.0f,  // top right
@@ -121,9 +135,28 @@ int main(void)
 	Texture texture1("asset/opengl.png", 0);
 	Texture texture2("asset/smile.png", 1);
 
+	shader.use();
+	shader.SetUniform1i("Texture1", 0);  // implicit ; default active texture unit is 0 hence its location is default
+	shader.SetUniform1i("Texture2", 1);
+
 	// Blending
 	GLCheckError(glEnable(GL_BLEND));
+	// glBlendFunc(src, dest)
+	// src: default is GL_ONE
+	// dest: default is GL_ZERO
+	// Apply blend func to all color channels (all of RGBA)
 	GLCheckError(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+	// Set blend mode: default is GL_FUNC_ADD
+	GLCheckError(glBlendEquation(GL_FUNC_ADD));
+
+	// Geometry Pipeline
+
+	// Orthogonal view volume: centered at 0 in world space, 4:3 aspect ratio
+	// glm::ortho(L, R, T, B, Near, Far)
+	// glm::mat4 projMat = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+
+	// Model-view-projection transformation matrix (for 2D just Model-view)
+	// Move over to render loop because we want animation
 
 	RenderLoop(window, vertexArray, shader);
 
