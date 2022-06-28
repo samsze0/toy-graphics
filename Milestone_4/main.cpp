@@ -50,17 +50,24 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 		float Opacity = sin(timeValue * 2) / 2.0f + 0.5f;
 		shader.SetUniform1f("opacity", Opacity);
 
-		// MVP
+		// Model Transform
 		// 4x4 identity matrix (diagonal values = 1)
-		glm::mat4 MVP = glm::mat4(1.0f);
+		glm::mat4 Model = glm::mat4(1.0f);
 		// Rotate matrix by z-axis
-		MVP = glm::rotate(MVP, glm::radians(sin(timeValue * 2) * 90), glm::vec3(0.0, 0.0, 1.0));
+		// Model = glm::rotate(Model, glm::radians(sin(timeValue * 2) * 90), glm::vec3(0.0, 0.0, 1.0));
+		// Rotate matrix by x-axis
+		Model = glm::rotate(Model, glm::radians(-60.0f), glm::vec3(1.0, 0.0, 0.0));
 		// Scale matrix by 0.5 in all dimensions
-		MVP = glm::scale(MVP, glm::vec3(0.5, 0.5, 0.5));
+		Model = glm::scale(Model, glm::vec3(0.5, 0.5, 0.5));
 		// Translate matrix
-		MVP = glm::translate(MVP, glm::vec3(sin(timeValue), cos(timeValue), 0.0f));
+		Model = glm::translate(Model, glm::vec3(sin(timeValue), cos(timeValue), 0.0f));
+		shader.SetUniformMatrix4fv("Model", Model);
 
-	shader.SetUniformMatrix4fv("MVP", MVP);
+		// View Transform
+		glm::mat4 View = glm::mat4(1.0f);
+		// Simulate camera moving away (every object moving into -ve z)
+		View = glm::translate(View, glm::vec3(0.0f, 0.0f, -timeValue));
+		shader.SetUniformMatrix4fv("View", View);
 
 		renderer.Draw(vertexArray, shader);
 
@@ -150,12 +157,19 @@ int main(void)
 	GLCheckError(glBlendEquation(GL_FUNC_ADD));
 
 	// Geometry Pipeline
+	// Model-view-projection transformation matrix (for 2D just Model-view)
 
+	// Projection
 	// Orthogonal view volume: centered at 0 in world space, 4:3 aspect ratio
 	// glm::ortho(L, R, T, B, Near, Far)
 	// glm::mat4 projMat = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+	glm::mat4 Projection;
+	// glm::perspective(fov, aspect ratio, near, far)
+	Projection = glm::perspective(glm::radians(60.0f), 640.0f / 640.0f, 0.1f, 100.0f);
+	shader.use();
+	shader.SetUniformMatrix4fv("Projection", Projection);
 
-	// Model-view-projection transformation matrix (for 2D just Model-view)
+	// View & Model
 	// Move over to render loop because we want animation
 
 	RenderLoop(window, vertexArray, shader);
