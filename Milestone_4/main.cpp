@@ -51,9 +51,16 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 		shader.SetUniform1f("opacity", Opacity);
 
 		// View Transform
-		glm::mat4 View = glm::mat4(1.0f);
-		// Simulate camera moving away (every object moving into -ve z)
-		View = glm::translate(View, glm::vec3(0.0f, 0.0f, -timeValue/3));
+		// glm::mat4 View = glm::mat4(1.0f);
+		// // Simulate camera moving away (every object moving into -ve z)
+		// View = glm::translate(View, glm::vec3(0.0f, 0.0f, -timeValue/3));
+		// shader.SetUniformMatrix4fv("View", View);
+		const float radius = 10.0f;
+		float camX = sin(glfwGetTime()) * radius;
+		float camZ = cos(glfwGetTime()) * radius;
+		glm::mat4 View;
+		// glm::lookAt(camera position, target position, up vector)
+		View = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 		shader.SetUniformMatrix4fv("View", View);
 
 		// Model Transform
@@ -79,6 +86,14 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 			glm::vec3(-4.0f, -4.0f, -4.0f),
 			glm::vec3( 4.0f, -4.0f, -4.0f),
 			glm::vec3(-4.0f,  4.0f, -4.0f),
+			glm::vec3( 2.0f,  2.0f,  2.0f),
+			glm::vec3(-2.0f, -2.0f,  2.0f),
+			glm::vec3( 2.0f, -2.0f,  2.0f),
+			glm::vec3(-2.0f,  2.0f,  2.0f),
+			glm::vec3( 4.0f,  4.0f,  4.0f),
+			glm::vec3(-4.0f, -4.0f,  4.0f),
+			glm::vec3( 4.0f, -4.0f,  4.0f),
+			glm::vec3(-4.0f,  4.0f,  4.0f),
 		};
 
 		for (const glm::vec3& translation : TranslationList) {
