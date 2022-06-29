@@ -18,22 +18,34 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "camera.h"
 
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	GLCheckError(glViewport(0, 0, width, height));
 }
 
-static void processInput(GLFWwindow *window) {
+static void processInput(GLFWwindow* window, Camera& camera) {
 	if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		camera.MoveForward();
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		camera.MoveBack();
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		camera.MoveLeft();
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		camera.MoveRight();
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		camera.MoveUp();
+	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+		camera.MoveDown();
 }
 
-static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& shader) {
+static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& shader, Renderer& renderer, Camera& camera) {
 	while (!glfwWindowShouldClose(window)) {
-		processInput(window);
-
-		Renderer renderer;
+		processInput(window, camera);
 
 		// Clear color buffer
 		renderer.Clear(1.0f, 1.0f, 1.0f, 1.0f);
@@ -55,12 +67,13 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 		// // Simulate camera moving away (every object moving into -ve z)
 		// View = glm::translate(View, glm::vec3(0.0f, 0.0f, -timeValue/3));
 		// shader.SetUniformMatrix4fv("View", View);
-		const float radius = 10.0f;
-		float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;
-		glm::mat4 View;
-		// glm::lookAt(camera position, target position, up vector)
-		View = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+		// const float radius = 10.0f;
+		// float camX = sin(glfwGetTime()) * radius;
+		// float camZ = cos(glfwGetTime()) * radius;
+		// glm::mat4 View;
+		// // glm::lookAt(camera position, target position, up vector)
+		// View = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+		glm::mat4 View = camera.GetViewMatrix();
 		shader.SetUniformMatrix4fv("View", View);
 
 		// Model Transform
@@ -241,14 +254,11 @@ int main(void)
 	// View & Model
 	// Move over to render loop because we want animation
 
-	// Enable Z-buffer depth-test
-	// To be disabled if need to render transparent objects
-	GLCheckError(glEnable(GL_DEPTH_TEST));
+	Renderer renderer;
 
-	// Disable face culling
-	// GLCheckError(glDisable(GL_CULL_FACE));
+	Camera camera(0.05f);
 
-	RenderLoop(window, vertexArray, shader);
+	RenderLoop(window, vertexArray, shader, renderer, camera);
 
 	return 0;
 }

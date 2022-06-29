@@ -29,6 +29,8 @@ add_executable(myexe
   renderer.h
   texture.cpp
   texture.h
+  camera.cpp
+  camera.h
 )
 
 # External dependencies (dynamic)

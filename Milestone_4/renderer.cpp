@@ -22,3 +22,21 @@ void Renderer::Draw(const VertexArray& vertexArray, const Shader& shader) const 
     GLCheckError(glDrawArrays(GL_TRIANGLES, 0, vertexArray.GetVertexBuffer().size / vertexArray.GetStride()));
   }
 }
+
+void Renderer::EnableDepthTest() const {
+  // Enable Z-buffer depth-test
+  // To be disabled if need to render transparent objects
+  GLCheckError(glEnable(GL_DEPTH_TEST));
+}
+
+void Renderer::DisableDepthTest() const {
+  GLCheckError(glDisable(GL_DEPTH_TEST));
+}
+
+void Renderer::EnableFaceCulling() const {
+  GLCheckError(glEnable(GL_CULL_FACE));
+}
+
+void Renderer::DisableFaceCulling() const {
+  GLCheckError(glDisable(GL_CULL_FACE));
+}
