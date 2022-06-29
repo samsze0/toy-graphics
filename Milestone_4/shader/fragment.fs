@@ -1,6 +1,5 @@
 #version 410 core
 
-in vec3 vertexColor;
 in vec2 texCoord;
 
 out vec4 fragColor;
@@ -15,8 +14,8 @@ void main() {
   fragColor = mix(
     texture(Texture1, texCoord),
     texture(Texture2, texCoord),
-    // 1
-    mixRatio
+    // mixRatio
+    1
   );  // 80% of first color & 20% of second
-  // fragColor.a = opacity;
+  fragColor.a = opacity;
 }

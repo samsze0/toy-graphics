@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "error.h"
+#include <iostream>
 
 
 void Renderer::Clear() const {
@@ -8,7 +9,7 @@ void Renderer::Clear() const {
 
 void Renderer::Clear(float r, float g, float b, float a) const {
   GLCheckError(glClearColor(r, g, b, a));
-  GLCheckError(glClear(GL_COLOR_BUFFER_BIT));
+  GLCheckError(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));  // Clear both Color buffer &  Depth buffer
 }
 
 void Renderer::Draw(const VertexArray& vertexArray, const Shader& shader) const {

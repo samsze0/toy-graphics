@@ -36,7 +36,7 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 		Renderer renderer;
 
 		// Clear color buffer
-		renderer.Clear(0.1f, 0.1f, 0.2f, 1.0f);
+		renderer.Clear(1.0f, 1.0f, 1.0f, 1.0f);
 
 		shader.use();
 		vertexArray.bind();
@@ -55,8 +55,8 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 		glm::mat4 Model = glm::mat4(1.0f);
 		// Rotate matrix by z-axis
 		// Model = glm::rotate(Model, glm::radians(sin(timeValue * 2) * 90), glm::vec3(0.0, 0.0, 1.0));
-		// Rotate matrix by x-axis
-		Model = glm::rotate(Model, glm::radians(-60.0f), glm::vec3(1.0, 0.0, 0.0));
+		// Rotate matrix by xy
+		Model = glm::rotate(Model, glm::radians(timeValue*60), glm::vec3(1.0, 1.0, 1.0));
 		// Scale matrix by 0.5 in all dimensions
 		Model = glm::scale(Model, glm::vec3(0.5, 0.5, 0.5));
 		// Translate matrix
@@ -66,7 +66,7 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 		// View Transform
 		glm::mat4 View = glm::mat4(1.0f);
 		// Simulate camera moving away (every object moving into -ve z)
-		View = glm::translate(View, glm::vec3(0.0f, 0.0f, -timeValue));
+		View = glm::translate(View, glm::vec3(0.0f, 0.0f, -timeValue/3));
 		shader.SetUniformMatrix4fv("View", View);
 
 		renderer.Draw(vertexArray, shader);
@@ -111,25 +111,61 @@ int main(void)
 	// Vertex Data
 	// Defining vertex position in world coord
 	float vertexData[] = {
-		 // position   // color           // texture coord
-		 0.5f,  0.5f,  0.2f, 0.3f, 0.8f,  1.0f, 1.0f,  // top right
-		 0.5f, -0.5f,  0.4f, 0.8f, 0.4f,  1.0f, 0.0f,  // bottom right
-		-0.5f, -0.5f,  0.7f, 0.6f, 0.8f,  0.0f, 0.0f,  // bottom left
-		-0.5f,  0.5f,  0.9f, 0.4f, 0.6f,  0.0f, 1.0f,  // top left
-	};
+		// position           // texture coord
+		// 1st face
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-	// EBO
-	unsigned int indices[] = {
-		0, 1, 3, // first triangle
-		1, 2, 3 // second triangle
+		// 2nd face
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		// 3rd face
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		// 4th face
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		 // 5th face
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		// 6th face
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
 	// VAO
 	VertexAttribVector vertexAttribVector;
-	vertexAttribVector.Push<float>(2, false);
 	vertexAttribVector.Push<float>(3, false);
 	vertexAttribVector.Push<float>(2, false);
-	VertexArray vertexArray = VertexArray((void*)vertexData, 4 * vertexAttribVector.GetStride(), indices, 6, vertexAttribVector);
+	VertexArray vertexArray = VertexArray((void*)vertexData, 6*6 * vertexAttribVector.GetStride(), vertexAttribVector);
 
 	// Shader
 	Shader shader = Shader("shader/vertex.vs", "shader/fragment.fs");
@@ -171,6 +207,12 @@ int main(void)
 
 	// View & Model
 	// Move over to render loop because we want animation
+
+	// Enable Z-buffer depth-test
+	GLCheckError(glEnable(GL_DEPTH_TEST));
+
+	// Disable face culling
+	// GLCheckError(glDisable(GL_CULL_FACE));
 
 	RenderLoop(window, vertexArray, shader);
 
