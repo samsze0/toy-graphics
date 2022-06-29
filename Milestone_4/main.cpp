@@ -21,31 +21,69 @@
 #include "camera.h"
 
 
-static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	GLCheckError(glViewport(0, 0, width, height));
+static float window_width = 640.0f;
+static float window_height = 480.0f;
+
+static double last_mouse_pos_x;
+static double last_mouse_pos_y;
+
+static bool first_mouse = true;
+
+static float last_frame = 0.0f;
+
+static Renderer renderer;
+static Camera camera;
+
+static void mouse_callback(GLFWwindow* window, double mouse_pos_x, double mouse_pos_y) {
+	if (first_mouse) {
+		last_mouse_pos_x = mouse_pos_x;
+		last_mouse_pos_y = mouse_pos_y;
+		first_mouse = false;
+	}
+
+	double x_offset = mouse_pos_x - last_mouse_pos_x;
+	double y_offset = last_mouse_pos_y - mouse_pos_y;  // reversed: y ranges bottom to top
+
+	camera.Look(x_offset, y_offset);
+
+	last_mouse_pos_x = mouse_pos_x;
+	last_mouse_pos_y = mouse_pos_y;
 }
 
-static void processInput(GLFWwindow* window, Camera& camera) {
+
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+	GLCheckError(glViewport(0, 0, width, height));
+	window_width = width;
+	window_height = height;
+}
+
+static void processInput(GLFWwindow* window, float deltaTime) {
 	if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		camera.MoveForward();
+		camera.MoveForward(deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		camera.MoveBack();
+		camera.MoveBack(deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		camera.MoveLeft();
+		camera.MoveLeft(deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		camera.MoveRight();
+		camera.MoveRight(deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-		camera.MoveUp();
+		camera.MoveUp(deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
-		camera.MoveDown();
+		camera.MoveDown(deltaTime);
 }
 
-static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& shader, Renderer& renderer, Camera& camera) {
+static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& shader) {
 	while (!glfwWindowShouldClose(window)) {
-		processInput(window, camera);
+		float current_frame = glfwGetTime();
+		float deltaTime = current_frame - last_frame;
+		// std::cout << "[Delta time (ms)] " << deltaTime << std::endl;
+		// std::cout << "[Frame rate] " << 1 / (deltaTime*0.001) << std::endl;
+
+		processInput(window, deltaTime);
+		last_frame = current_frame;
 
 		// Clear color buffer
 		renderer.Clear(1.0f, 1.0f, 1.0f, 1.0f);
@@ -61,6 +99,10 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 
 		float Opacity = sin(timeValue * 2) / 2.0f + 0.5f;
 		shader.SetUniform1f("opacity", Opacity);
+
+		// Project Transform
+		glm::mat4 Projection = camera.GetProjectionMatrix(window_width/window_height);
+  	shader.SetUniformMatrix4fv("Projection", Projection);
 
 		// View Transform
 		// glm::mat4 View = glm::mat4(1.0f);
@@ -142,7 +184,7 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	// Create window
-	window = glfwCreateWindow(640, 640, "Toy OpenGL", NULL, NULL);
+	window = glfwCreateWindow(window_width, window_height, "Toy OpenGL", NULL, NULL);
 	if (!window) {
 		glfwTerminate();
 		throw std::runtime_error("GLFW: fail to create window");
@@ -150,9 +192,17 @@ int main(void)
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+	// Capture mouse cursor: hide cursor and keep it stays at center of window
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window, mouse_callback);
+
 	// Initialise GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		throw std::runtime_error("GLAD: fail to initialise");	
+
+	// Renderer
+	renderer.EnableDepthTest();
+	// renderer.EnableFaceCulling();
 
 	// Vertex Data
 	// Defining vertex position in world coord
@@ -241,24 +291,13 @@ int main(void)
 	// Geometry Pipeline
 	// Model-view-projection transformation matrix (for 2D just Model-view)
 
-	// Projection
-	// Orthogonal view volume: centered at 0 in world space, 4:3 aspect ratio
-	// glm::ortho(L, R, T, B, Near, Far)
-	// glm::mat4 projMat = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
-	glm::mat4 Projection;
-	// glm::perspective(fov, aspect ratio, near, far)
-	Projection = glm::perspective(glm::radians(60.0f), 640.0f / 640.0f, 0.1f, 100.0f);
-	shader.use();
-	shader.SetUniformMatrix4fv("Projection", Projection);
+	// Projection & View Transform
+	// Move over to Camera class
 
-	// View & Model
+	// Model Transform
 	// Move over to render loop because we want animation
 
-	Renderer renderer;
-
-	Camera camera(0.05f);
-
-	RenderLoop(window, vertexArray, shader, renderer, camera);
+	RenderLoop(window, vertexArray, shader);
 
 	return 0;
 }
