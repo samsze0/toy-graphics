@@ -17,5 +17,6 @@ void main() {
     // mixRatio
     1
   );  // 80% of first color & 20% of second
-  fragColor.a = opacity;
+  // fragColor.a = opacity;
+  fragColor.a = 1;  // disable transparency
 }

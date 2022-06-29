@@ -227,6 +227,7 @@ int main(void)
 	// Move over to render loop because we want animation
 
 	// Enable Z-buffer depth-test
+	// To be disabled if need to render transparent objects
 	GLCheckError(glEnable(GL_DEPTH_TEST));
 
 	// Disable face culling
