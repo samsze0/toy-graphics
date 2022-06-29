@@ -50,26 +50,44 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 		float Opacity = sin(timeValue * 2) / 2.0f + 0.5f;
 		shader.SetUniform1f("opacity", Opacity);
 
-		// Model Transform
-		// 4x4 identity matrix (diagonal values = 1)
-		glm::mat4 Model = glm::mat4(1.0f);
-		// Rotate matrix by z-axis
-		// Model = glm::rotate(Model, glm::radians(sin(timeValue * 2) * 90), glm::vec3(0.0, 0.0, 1.0));
-		// Rotate matrix by xy
-		Model = glm::rotate(Model, glm::radians(timeValue*60), glm::vec3(1.0, 1.0, 1.0));
-		// Scale matrix by 0.5 in all dimensions
-		Model = glm::scale(Model, glm::vec3(0.5, 0.5, 0.5));
-		// Translate matrix
-		Model = glm::translate(Model, glm::vec3(sin(timeValue), cos(timeValue), 0.0f));
-		shader.SetUniformMatrix4fv("Model", Model);
-
 		// View Transform
 		glm::mat4 View = glm::mat4(1.0f);
 		// Simulate camera moving away (every object moving into -ve z)
 		View = glm::translate(View, glm::vec3(0.0f, 0.0f, -timeValue/3));
 		shader.SetUniformMatrix4fv("View", View);
 
-		renderer.Draw(vertexArray, shader);
+		// Model Transform
+		// // 4x4 identity matrix (diagonal values = 1)
+		// glm::mat4 Model = glm::mat4(1.0f);
+		// // Rotate matrix by z-axis
+		// // Model = glm::rotate(Model, glm::radians(sin(timeValue * 2) * 90), glm::vec3(0.0, 0.0, 1.0));
+		// // Rotate matrix by xy
+		// Model = glm::rotate(Model, glm::radians(timeValue*60), glm::vec3(1.0, 1.0, 1.0));
+		// // Scale matrix by 0.5 in all dimensions
+		// Model = glm::scale(Model, glm::vec3(0.5, 0.5, 0.5));
+		// // Translate matrix
+		// Model = glm::translate(Model, glm::vec3(sin(timeValue), cos(timeValue), 0.0f));
+		// shader.SetUniformMatrix4fv("Model", Model);
+
+		glm::vec3 TranslationList[] = {
+			glm::vec3( 0.0f,  0.0f,  0.0f),
+			glm::vec3( 2.0f,  2.0f, -2.0f),
+			glm::vec3(-2.0f, -2.0f, -2.0f),
+			glm::vec3( 2.0f, -2.0f, -2.0f),
+			glm::vec3(-2.0f,  2.0f, -2.0f),
+			glm::vec3( 4.0f,  4.0f, -4.0f),
+			glm::vec3(-4.0f, -4.0f, -4.0f),
+			glm::vec3( 4.0f, -4.0f, -4.0f),
+			glm::vec3(-4.0f,  4.0f, -4.0f),
+		};
+
+		for (const glm::vec3& translation : TranslationList) {
+			glm::mat4 Model = glm::mat4(1.0f);
+			Model = glm::translate(Model, translation);
+			Model = glm::rotate(Model, glm::radians(timeValue*30), glm::vec3(1.0f, 1.0f, 1.0f));
+			shader.SetUniformMatrix4fv("Model", Model);
+			renderer.Draw(vertexArray, shader);
+		}
 
 		// Double buffering
 		glfwSwapBuffers(window);
