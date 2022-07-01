@@ -13,4 +13,10 @@ cmake -S . -B build/ \
 # option(GLFW_BUILD_DOCS "Build the GLFW documentation" ON)
 # option(GLFW_INSTALL "Generate installation target" ON)
 
-cp build/compile_commands.json .
+# cp build/compile_commands.json .
+
+# Header files are not passed to compiler, hence no autocompletion
+# See:
+# https://lsp.sublimetext.io/guides/cplusplus/
+# https://github.com/Sarcasm/compdb#introduction
+compdb -p build/ list > compile_commands.json

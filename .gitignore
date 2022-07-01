@@ -42,3 +42,6 @@ build/
 
 # Compile commands
 **/compile_commands.json
+
+# Imgui ini
+**/imgui.ini

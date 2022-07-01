@@ -18,10 +18,18 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "camera.h"
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 
-static float window_width = 640.0f;
-static float window_height = 480.0f;
+// States & constants as static variables
+
+// GL 4.1 + GLSL 150
+static const char* glsl_version = "#version 150";
+
+static float window_width = 1280.0f;
+static float window_height = 720.0f;
 
 static double last_mouse_pos_x;
 static double last_mouse_pos_y;
@@ -29,9 +37,12 @@ static double last_mouse_pos_y;
 static bool first_mouse = true;
 
 static float last_frame = 0.0f;
+static float deltaTime;
 
 static Renderer renderer;
 static Camera camera;
+
+static bool show_menu = false;
 
 static void mouse_callback(GLFWwindow* window, double mouse_pos_x, double mouse_pos_y) {
 	if (first_mouse) {
@@ -43,12 +54,12 @@ static void mouse_callback(GLFWwindow* window, double mouse_pos_x, double mouse_
 	double x_offset = mouse_pos_x - last_mouse_pos_x;
 	double y_offset = last_mouse_pos_y - mouse_pos_y;  // reversed: y ranges bottom to top
 
-	camera.Look(x_offset, y_offset);
+	if (!show_menu)
+		camera.Look(x_offset, y_offset);
 
 	last_mouse_pos_x = mouse_pos_x;
 	last_mouse_pos_y = mouse_pos_y;
 }
-
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	GLCheckError(glViewport(0, 0, width, height));
@@ -56,10 +67,37 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	window_height = height;
 }
 
-static void processInput(GLFWwindow* window, float deltaTime) {
-	if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
+	// Cause stutter because it is asynchronous?
+	// if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
+	// 	camera.MoveForward(deltaTime);
+	// if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
+	// 	camera.MoveBack(deltaTime);
+	// 	if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
+	// 	camera.MoveLeft(deltaTime);
+	// if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
+	// 	camera.MoveRight(deltaTime);
+	// if (key == GLFW_KEY_E && (action == GLFW_PRESS || action == GLFW_REPEAT))
+	// 	camera.MoveUp(deltaTime);
+	// if (key == GLFW_KEY_C && (action == GLFW_PRESS || action == GLFW_REPEAT))
+	// 	camera.MoveDown(deltaTime);
+
+	// Doesn't work with imgui because GLFW_CURSOR_DISABLED and glfwSetCursorPosCallback messes up the cursor
+	if (key == GLFW_KEY_V && action == GLFW_PRESS) {
+		if (show_menu) {
+			// Capture mouse cursor: hide cursor and keep it stays at center of window
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		} else {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+		show_menu = !show_menu;
+	}
+}
+
+static void processPlayerMovementInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.MoveForward(deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -77,11 +115,15 @@ static void processInput(GLFWwindow* window, float deltaTime) {
 static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& shader) {
 	while (!glfwWindowShouldClose(window)) {
 		float current_frame = glfwGetTime();
-		float deltaTime = current_frame - last_frame;
+		deltaTime = current_frame - last_frame;
 		// std::cout << "[Delta time (ms)] " << deltaTime << std::endl;
 		// std::cout << "[Frame rate] " << 1 / (deltaTime*0.001) << std::endl;
 
-		processInput(window, deltaTime);
+		// Process events e.g. keyboard
+		glfwPollEvents();
+		if (!show_menu)
+			processPlayerMovementInput(window);
+
 		last_frame = current_frame;
 
 		// Clear color buffer
@@ -136,12 +178,27 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 			renderer.Draw(vertexArray, shader);
 		}
 
-		// Double buffering
-		glfwSwapBuffers(window);
+		// Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 
-		// Process events e.g. keyboard
-		glfwPollEvents();
+    // Show Imgui demo window
+    if (show_menu)
+      ImGui::ShowDemoWindow(&show_menu);
+
+    // Imgui Rendering
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    // Double buffering
+		glfwSwapBuffers(window);
 	}
+
+	// Imgui cleanup
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
 
 	glfwTerminate();
 }
@@ -168,14 +225,28 @@ int main(void)
 	}
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	// glfwSwapInterval(1); // Enable vsync
 
-	// Capture mouse cursor: hide cursor and keep it stays at center of window
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
+
+	// Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO();
+
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+
+  // Setup Platform/Renderer backends
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init(glsl_version);
 
 	// Initialise GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		throw std::runtime_error("GLAD: fail to initialise");	
+
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetKeyCallback(window, key_callback);
 
 	// Renderer
 	renderer.EnableDepthTest();

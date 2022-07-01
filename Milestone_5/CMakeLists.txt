@@ -41,6 +41,7 @@ add_subdirectory(external/glfw)
 add_subdirectory(external/glad)
 add_subdirectory(external/stb)
 add_subdirectory(external/glm)
+add_subdirectory(external/imgui)
 
 
 # Link lib to main
@@ -49,6 +50,7 @@ target_link_libraries(myexe
   PRIVATE glad
   PRIVATE stb
   PRIVATE glm
+  PRIVATE imgui
 )
 
 # Such that include path is independent of project structure
@@ -57,4 +59,6 @@ target_include_directories(myexe
   PRIVATE external/glad/include/
   PRIVATE external/stb/include/
   PRIVATE external/glm/
+  PRIVATE external/imgui/
+  PRIVATE external/imgui/backends/
 )
