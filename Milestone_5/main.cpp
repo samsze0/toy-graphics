@@ -39,10 +39,15 @@ static bool first_mouse = true;
 static float last_frame = 0.0f;
 static float deltaTime;
 
+static GLFWwindow* window = nullptr;
+// Possible to initialise with NULL? (NULL constructor?)
 static Renderer renderer;
 static Camera camera;
 
 static bool show_menu = false;
+static bool show_stats = true;
+
+static ImVec4 clear_color = ImVec4(75.0f/256.0f, 114.0f/256.0f, 154.0f/256.0f, 1.00f);
 
 static void mouse_callback(GLFWwindow* window, double mouse_pos_x, double mouse_pos_y) {
 	if (first_mouse) {
@@ -68,25 +73,15 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	if (key == GLFW_KEY_P && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
 	// Cause stutter because it is asynchronous?
 	// if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
 	// 	camera.MoveForward(deltaTime);
-	// if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
-	// 	camera.MoveBack(deltaTime);
-	// 	if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
-	// 	camera.MoveLeft(deltaTime);
-	// if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
-	// 	camera.MoveRight(deltaTime);
-	// if (key == GLFW_KEY_E && (action == GLFW_PRESS || action == GLFW_REPEAT))
-	// 	camera.MoveUp(deltaTime);
-	// if (key == GLFW_KEY_C && (action == GLFW_PRESS || action == GLFW_REPEAT))
-	// 	camera.MoveDown(deltaTime);
 
 	// Doesn't work with imgui because GLFW_CURSOR_DISABLED and glfwSetCursorPosCallback messes up the cursor
-	if (key == GLFW_KEY_V && action == GLFW_PRESS) {
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		if (show_menu) {
 			// Capture mouse cursor: hide cursor and keep it stays at center of window
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -112,10 +107,10 @@ static void processPlayerMovementInput(GLFWwindow* window) {
 		camera.MoveDown(deltaTime);
 }
 
-static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& shader) {
+static void RenderLoop(VertexArray& vertexArray, Shader& shader) {
 	while (!glfwWindowShouldClose(window)) {
 		float current_frame = glfwGetTime();
-		deltaTime = current_frame - last_frame;
+		deltaTime = (current_frame - last_frame) * 1000;
 		// std::cout << "[Delta time (ms)] " << deltaTime << std::endl;
 		// std::cout << "[Frame rate] " << 1 / (deltaTime*0.001) << std::endl;
 
@@ -127,7 +122,8 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 		last_frame = current_frame;
 
 		// Clear color buffer
-		renderer.Clear(1.0f, 1.0f, 1.0f, 1.0f);
+		renderer.Clear(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+		// renderer.Clear(1.0f, 1.0f, 1.0f, 1.0f);
 
 		shader.use();
 		vertexArray.bind();
@@ -183,9 +179,78 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // Show Imgui demo window
-    if (show_menu)
-      ImGui::ShowDemoWindow(&show_menu);
+    // Menu
+    if (show_menu) {
+    	ImGuiWindowFlags window_flags = 0;
+	    window_flags |= ImGuiWindowFlags_NoTitleBar;
+	    window_flags |= ImGuiWindowFlags_NoMove;
+	    window_flags |= ImGuiWindowFlags_NoResize;
+	    window_flags |= ImGuiWindowFlags_NoCollapse;
+	    window_flags |= ImGuiWindowFlags_NoNav;
+	    bool* p_open = NULL;
+
+	    ImGui::Begin("Menu", p_open, window_flags);
+	    ImGui::Checkbox("[Display stats]", &show_stats);
+	    ImGui::SliderFloat("[FOV]", &camera.FOV(), 30.0f, 120.0f);
+	    ImGui::SliderFloat("[Camera speed]", &camera.Speed(), 0.003f, 0.01f);
+	    ImGui::ColorEdit3("[Background color]", (float*)&clear_color);
+	    ImGui::End();
+	   }
+
+    // Stats
+	  if (show_stats) {
+	  	ImGuiWindowFlags window_flags = 0;
+	    window_flags |= ImGuiWindowFlags_NoTitleBar;
+	    window_flags |= ImGuiWindowFlags_NoMove;
+	    window_flags |= ImGuiWindowFlags_NoResize;
+	    window_flags |= ImGuiWindowFlags_NoCollapse;
+	    window_flags |= ImGuiWindowFlags_NoNav;
+	    bool* p_open = NULL;
+
+	    ImGui::Begin("Stats", p_open, window_flags);
+	    ImGui::Text("[Frame rate] %.1f", 1 / (deltaTime*0.001));
+	    ImGui::Text("[Delta time] %.3f ms/frame", deltaTime);
+	    ImGui::Text("[UI frame rate] %.1f", ImGui::GetIO().Framerate);
+	    ImGui::Text("[UI delta time] %.3f ms/frame", 1000.0f / ImGui::GetIO().Framerate);
+	    ImGui::End();
+   	}
+
+    // 1. Show Imgui demo window
+    // if (show_menu)
+      // ImGui::ShowDemoWindow(&show_menu);
+
+    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+    // {
+    //   static float f = 0.0f;
+    //   static int counter = 0;
+
+    //   ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+    //   ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+    //   ImGui::Checkbox("Demo Window", &show_menu);      // Edit bools storing our window open/close state
+    //   ImGui::Checkbox("Another Window", &show_stats);
+
+    //   ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+    //   ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+    //   if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+    //     counter++;
+    //   ImGui::SameLine();
+    //   ImGui::Text("counter = %d", counter);
+
+    //   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    //   ImGui::End();
+    // }
+
+    // 3. Show another simple window.
+    // if (show_stats)
+    // {
+    //   ImGui::Begin("Another Window", &show_stats);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+    //   ImGui::Text("Hello from another window!");
+    //   if (ImGui::Button("Close Me"))
+    //     show_stats = false;
+    //   ImGui::End();
+    // }
 
     // Imgui Rendering
     ImGui::Render();
@@ -205,8 +270,6 @@ static void RenderLoop(GLFWwindow* window, VertexArray& vertexArray, Shader& sha
 
 int main(void)
 {
-	GLFWwindow* window;
-
 	// Initialise GLFW
 	if (!glfwInit())
 		throw std::runtime_error("GLFW: fail to initialise");
@@ -234,12 +297,22 @@ int main(void)
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
 
-  // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
+
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+
+  // Setup UI font
+  // Load Fonts
+  // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
+  // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
+  // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
+  // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
+  // - Read 'docs/FONTS.md' for more instructions and details.
+  // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
+  io.Fonts->AddFontFromFileTTF("./asset/Roboto-Medium.ttf", 16.0f);
 
 	// Initialise GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -249,6 +322,7 @@ int main(void)
 	glfwSetKeyCallback(window, key_callback);
 
 	// Renderer
+	renderer.Init();
 	renderer.EnableDepthTest();
 	// renderer.EnableFaceCulling();
 	// renderer.EnableBlending();
@@ -323,7 +397,7 @@ int main(void)
 	shader.SetUniform1i("Texture1", 0);  // implicit ; default active texture unit is 0 hence its location is default
 	shader.SetUniform1i("Texture2", 1);
 
-	RenderLoop(window, vertexArray, shader);
+	RenderLoop(vertexArray, shader);
 
 	return 0;
 }

@@ -79,3 +79,19 @@ void Camera::Look(double x_offset, double y_offset) {
 
   this->lookAt = CalculateLookTarget(this->yaw, this->pitch);
 }
+
+// float Camera::GetFOV() const {
+//   return this->fov;
+// }
+
+// void Camera::SetFOV(float fov) {
+//   this->fov = fov;
+// }
+
+float& Camera::Speed() {
+  return this->speed;
+}
+
+float& Camera::FOV() {
+  return this->fov;
+}

@@ -9,7 +9,7 @@ class Camera {
 private:
   // For deriving camera position
   glm::vec3 pos = glm::vec3(0.0f, 0.0f, 3.0f);  // by default position at +ve z
-  float speed = 5.0f;
+  float speed = 0.003f;
   // glm::vec3 target = glm::vec3(0.0f, 0.0f, 0.0f);  // by default look at origin
   glm::vec3 lookAt;  // define by pitch and yaw
   glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -34,4 +34,8 @@ public:
   void MoveUp(float deltaTime);
   void MoveDown(float deltaTime);
   void Look(double x_offset, double y_offset);
+  // float GetFOV() const;
+  // void SetFOV(float fov);
+  float& Speed();
+  float& FOV();
 };
