@@ -21,6 +21,11 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include "ui/demo.h"
+#include "ui/menu.h"
+#include "ui/stats.h"
+#include "model/vertexData.h"
+#include "model/translationList.h"
 
 
 // States & constants as static variables
@@ -28,8 +33,8 @@
 // GL 4.1 + GLSL 150
 static const char* glsl_version = "#version 150";
 
-static float window_width = 1280.0f;
-static float window_height = 720.0f;
+static float window_width = 640.0f;
+static float window_height = 640.0f;
 
 static double last_mouse_pos_x;
 static double last_mouse_pos_y;
@@ -146,26 +151,6 @@ static void RenderLoop(VertexArray& vertexArray, Shader& shader) {
 		shader.SetUniformMatrix4fv("View", View);
 
 		// Model Transform
-		glm::vec3 TranslationList[] = {
-			glm::vec3( 0.0f,  0.0f,  0.0f),
-			glm::vec3( 2.0f,  2.0f, -2.0f),
-			glm::vec3(-2.0f, -2.0f, -2.0f),
-			glm::vec3( 2.0f, -2.0f, -2.0f),
-			glm::vec3(-2.0f,  2.0f, -2.0f),
-			glm::vec3( 4.0f,  4.0f, -4.0f),
-			glm::vec3(-4.0f, -4.0f, -4.0f),
-			glm::vec3( 4.0f, -4.0f, -4.0f),
-			glm::vec3(-4.0f,  4.0f, -4.0f),
-			glm::vec3( 2.0f,  2.0f,  2.0f),
-			glm::vec3(-2.0f, -2.0f,  2.0f),
-			glm::vec3( 2.0f, -2.0f,  2.0f),
-			glm::vec3(-2.0f,  2.0f,  2.0f),
-			glm::vec3( 4.0f,  4.0f,  4.0f),
-			glm::vec3(-4.0f, -4.0f,  4.0f),
-			glm::vec3( 4.0f, -4.0f,  4.0f),
-			glm::vec3(-4.0f,  4.0f,  4.0f),
-		};
-
 		for (const glm::vec3& translation : TranslationList) {
 			glm::mat4 Model = glm::mat4(1.0f);
 			Model = glm::translate(Model, translation);
@@ -179,78 +164,9 @@ static void RenderLoop(VertexArray& vertexArray, Shader& shader) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // Menu
-    if (show_menu) {
-    	ImGuiWindowFlags window_flags = 0;
-	    window_flags |= ImGuiWindowFlags_NoTitleBar;
-	    window_flags |= ImGuiWindowFlags_NoMove;
-	    window_flags |= ImGuiWindowFlags_NoResize;
-	    window_flags |= ImGuiWindowFlags_NoCollapse;
-	    window_flags |= ImGuiWindowFlags_NoNav;
-	    bool* p_open = NULL;
-
-	    ImGui::Begin("Menu", p_open, window_flags);
-	    ImGui::Checkbox("[Display stats]", &show_stats);
-	    ImGui::SliderFloat("[FOV]", &camera.FOV(), 30.0f, 120.0f);
-	    ImGui::SliderFloat("[Camera speed]", &camera.Speed(), 0.003f, 0.01f);
-	    ImGui::ColorEdit3("[Background color]", (float*)&clear_color);
-	    ImGui::End();
-	   }
-
-    // Stats
-	  if (show_stats) {
-	  	ImGuiWindowFlags window_flags = 0;
-	    window_flags |= ImGuiWindowFlags_NoTitleBar;
-	    window_flags |= ImGuiWindowFlags_NoMove;
-	    window_flags |= ImGuiWindowFlags_NoResize;
-	    window_flags |= ImGuiWindowFlags_NoCollapse;
-	    window_flags |= ImGuiWindowFlags_NoNav;
-	    bool* p_open = NULL;
-
-	    ImGui::Begin("Stats", p_open, window_flags);
-	    ImGui::Text("[Frame rate] %.1f", 1 / (deltaTime*0.001));
-	    ImGui::Text("[Delta time] %.3f ms/frame", deltaTime);
-	    ImGui::Text("[UI frame rate] %.1f", ImGui::GetIO().Framerate);
-	    ImGui::Text("[UI delta time] %.3f ms/frame", 1000.0f / ImGui::GetIO().Framerate);
-	    ImGui::End();
-   	}
-
-    // 1. Show Imgui demo window
-    // if (show_menu)
-      // ImGui::ShowDemoWindow(&show_menu);
-
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-    // {
-    //   static float f = 0.0f;
-    //   static int counter = 0;
-
-    //   ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-    //   ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-    //   ImGui::Checkbox("Demo Window", &show_menu);      // Edit bools storing our window open/close state
-    //   ImGui::Checkbox("Another Window", &show_stats);
-
-    //   ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-    //   ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-    //   if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-    //     counter++;
-    //   ImGui::SameLine();
-    //   ImGui::Text("counter = %d", counter);
-
-    //   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    //   ImGui::End();
-    // }
-
-    // 3. Show another simple window.
-    // if (show_stats)
-    // {
-    //   ImGui::Begin("Another Window", &show_stats);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-    //   ImGui::Text("Hello from another window!");
-    //   if (ImGui::Button("Close Me"))
-    //     show_stats = false;
-    //   ImGui::End();
-    // }
+   	UI::Demo(show_menu);
+   	UI::Menu(show_menu, show_stats, camera, clear_color);
+   	UI::Stats(show_stats, deltaTime);
 
     // Imgui Rendering
     ImGui::Render();
@@ -279,6 +195,22 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+	// Other window hints
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	// glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);  // "Decorated": border, close widget, title bar
+	glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+	glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+	// glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);  // Enable transparency
+
+	// OSX specific window hints
+	glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
+
+	// Window icon
+	// GLFWimage images[2];
+	// images[0] = load_icon("my_icon.png");
+	// images[1] = load_icon("my_icon_small.png");
+	// glfwSetWindowIcon(window, 2, images);
 
 	// Create window
 	window = glfwCreateWindow(window_width, window_height, "Toy OpenGL", NULL, NULL);
@@ -326,59 +258,6 @@ int main(void)
 	renderer.EnableDepthTest();
 	// renderer.EnableFaceCulling();
 	// renderer.EnableBlending();
-
-	// Vertex Data
-	// Defining vertex position in world coord
-	float vertexData[] = {
-		// position           // texture coord
-		// 1st face
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-		// 2nd face
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-		// 3rd face
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		// 4th face
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		 // 5th face
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-		// 6th face
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
 
 	// VAO
 	VertexAttribVector vertexAttribVector;

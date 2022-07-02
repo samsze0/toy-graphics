@@ -31,6 +31,16 @@ add_executable(myexe
   texture.h
   camera.cpp
   camera.h
+  ui/demo.cpp
+  ui/demo.h
+  ui/menu.cpp
+  ui/menu.h
+  ui/stats.cpp
+  ui/stats.h
+  model/vertexData.cpp
+  model/vertexData.h
+  model/translationList.cpp
+  model/translationList.h
 )
 
 # External dependencies (dynamic)
