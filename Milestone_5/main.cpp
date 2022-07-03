@@ -55,6 +55,12 @@ static bool show_stats = true;
 static ImVec4 clear_color = ImVec4(75.0f/256.0f, 114.0f/256.0f, 154.0f/256.0f, 1.00f);
 
 static void mouse_callback(GLFWwindow* window, double mouse_pos_x, double mouse_pos_y) {
+	// Doesn't work to include show_menu logic here
+	// Seem like unable to synchronise key_callback and mouse_callback
+	// Race between mouse_callback and key_callback (when escape is pressed)
+	// if (show_menu)
+	// 	return;
+
 	if (first_mouse) {
 		last_mouse_pos_x = mouse_pos_x;
 		last_mouse_pos_y = mouse_pos_y;
@@ -64,8 +70,8 @@ static void mouse_callback(GLFWwindow* window, double mouse_pos_x, double mouse_
 	double x_offset = mouse_pos_x - last_mouse_pos_x;
 	double y_offset = last_mouse_pos_y - mouse_pos_y;  // reversed: y ranges bottom to top
 
-	if (!show_menu)
-		camera.Look(x_offset, y_offset);
+	// if (!show_menu)
+	camera.Look(x_offset, y_offset);
 
 	last_mouse_pos_x = mouse_pos_x;
 	last_mouse_pos_y = mouse_pos_y;
@@ -88,10 +94,15 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	// Doesn't work with imgui because GLFW_CURSOR_DISABLED and glfwSetCursorPosCallback messes up the cursor
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		if (show_menu) {
+			// Restore to previous cursor position once exit menu
+			// glfwSetCursorPos(window, last_mouse_pos_x, last_mouse_pos_y);
+			first_mouse = true;
 			// Capture mouse cursor: hide cursor and keep it stays at center of window
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			glfwSetCursorPosCallback(window, mouse_callback);
 		} else {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			glfwSetCursorPosCallback(window, nullptr);
 		}
 		show_menu = !show_menu;
 	}
@@ -164,9 +175,9 @@ static void RenderLoop(VertexArray& vertexArray, Shader& shader) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-   	UI::Demo(show_menu);
-   	UI::Menu(show_menu, show_stats, camera, clear_color);
-   	UI::Stats(show_stats, deltaTime);
+   	// UI::Demo(show_menu);
+   	UI::Menu(show_menu, show_stats, camera, clear_color, window_width, window_height);
+   	UI::Stats(show_stats, deltaTime, window_width, window_height, last_mouse_pos_x, last_mouse_pos_y);
 
     // Imgui Rendering
     ImGui::Render();
@@ -197,11 +208,11 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	// Other window hints
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	// glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	// glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);  // "Decorated": border, close widget, title bar
 	glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
-	glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
-	// glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);  // Enable transparency
+	// glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);  // Enable transparency
 
 	// OSX specific window hints
 	glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
