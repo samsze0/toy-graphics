@@ -53,7 +53,7 @@ Resources
 # C++
 
 ## Dynamic Library
-- `*dll.lib` contains function pointers to the functions in `.dll`. Eliminate need to query the functions locations at runtime (by invoking a dynamic loader)
+- `*dll.lib` contains function pointers to the functions in `.dll` (`.dylib` if *nix). Eliminate need to query the functions locations at runtime (by invoking a dynamic loader)
 - Place `.dll` at same directory as `.exe` to have `.dll` be loaded at launch time
 - Dynamic lib lives in the same process and address space (global, heap, stack, code) hence global and heap are shared
 - A dynamic loader process is started by the kernel at launch time and the loader will attempt to find all dependent libraries in the filesystem. Abort if cannot find all. The dynamic loader also loads dynamic lib at runtime at the app's request (on-request).
@@ -61,3 +61,46 @@ Resources
   - `dlopen`: "Open" the lib. Load dynamic lib into current process's address space (if not already exist). Return dynamic lib handle. Increment ref count (no. times current process has invoked `dlopen` on the dynamic lib)
   - `dlsys`: Return the address of the requested symbol exported by the dynamic lib
   - `dlcount`: Decrement ref count. If ref count reaches 0, unload lib from current process's address space
+- ABI (app binary interface) all the symbols exposed to clients
+- API (app programming interface) functions that a library makes available to its clients
+- Must disclose the library’s major version number in its filename if intended to have future revisions
+- Break the ABI/API = major version
+- Compiler `-current_version` option to set the minor version
+- Compiler `-compatibility_version` option to set the earliest minor version of the dynamic lib that the `.exe` is compatible with. At load time, the compatibility version is compared against the minor version of the dynamic lib situated in the file system. Abort if not compatible (< compatibility version)
+
+### Symbol Exporting Strategies
+- Prefix private symbols with `_`
+1. `static`: drawback: hide private symbols from other modules in the dynamic lib
+2. `export_list` file: list all the public symbols (with an `_` prefix)
+
+```
+# File: export_list
+_name
+_set_name
+```
+
+```bash
+clang -dynamiclib Person.c -exported_symbols_list export_list -o libPerson.dylib
+```
+
+3. Combination of visibility attribute and compiler `-fvisibility` option (specifies the visibility of symbols with unspecified visibility)
+
+```c++
+/* File: Person.c */
+
+// Symbolic name for visibility("default") attribute.
+#define EXPORT __attribute__((visibility("default")))
+
+EXPORT                        // Symbol to export
+char* name(void) {
+    return _person_name;
+}
+ 
+void _set_name(char* name) {
+   strcpy(_person_name, name);
+}
+```
+
+```bash
+% clang -dynamiclib Person.c -fvisibility=hidden -o libPerson.dylib
+```
