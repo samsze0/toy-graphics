@@ -21,6 +21,10 @@ Resources
 - Wikipedia on Computer Graphics
 - Real-time Rendering 4th edition
 - [Apple developer document archive on dynamic lib](https://developer.apple.com/library/archive/documentation/DeveloperTools/Conceptual/DynamicLibraries/100-Articles/OverviewOfDynamicLibraries.html)
+- [Tomshardware forum - core vs thread](https://forums.tomshardware.com/threads/cores-vs-threads-explained.3460905/)
+- [Stackoverflow - process vs thread](https://stackoverflow.com/questions/200469/what-is-the-difference-between-a-process-and-a-thread)
+- [Wikipedia - dynamic dispatch](https://en.wikipedia.org/wiki/Dynamic_dispatch)
+- [Wikipedia - virtual function table](https://en.wikipedia.org/wiki/Virtual_method_table)
 
 # Computer Graphics Basics
 
@@ -53,11 +57,11 @@ Resources
 # C++
 
 ## Dynamic Library
-- `*dll.lib` contains function pointers to the functions in `.dll` (`.dylib` if *nix). Eliminate need to query the functions locations at runtime (by invoking a dynamic loader)
+- `*dll.lib` contains function pointers to the functions in `.dll` (`.dylib` if \*nix). Eliminate need to query the functions locations at runtime (by invoking a dynamic loader)
 - Place `.dll` at same directory as `.exe` to have `.dll` be loaded at launch time
 - Dynamic lib lives in the same process and address space (global, heap, stack, code) hence global and heap are shared
 - A dynamic loader process is started by the kernel at launch time and the loader will attempt to find all dependent libraries in the filesystem. Abort if cannot find all. The dynamic loader also loads dynamic lib at runtime at the app's request (on-request).
-- Different platform implement dynamic loader differently. *nix uses DLC (dynamic loader compatibility) functions
+- Different platform implement dynamic loader differently. \*nix uses DLC (dynamic loader compatibility) functions
   - `dlopen`: "Open" the lib. Load dynamic lib into current process's address space (if not already exist). Return dynamic lib handle. Increment ref count (no. times current process has invoked `dlopen` on the dynamic lib)
   - `dlsys`: Return the address of the requested symbol exported by the dynamic lib
   - `dlcount`: Decrement ref count. If ref count reaches 0, unload lib from current process's address space
@@ -104,3 +108,128 @@ void _set_name(char* name) {
 ```bash
 % clang -dynamiclib Person.c -fvisibility=hidden -o libPerson.dylib
 ```
+
+## Process Management
+- Platform-dependent
+- For \*nix: 
+
+## Parallelism (thread & process)
+- Hardware-level multithreading: asynchronously run multiple tasks on a single core at once (minimising idle time of the CPU by efficient scheduling)
+  - OS sees processor as having twice as many cores, but performance-wise, these extra hardware threads only provide around 50% more performance compared to an actual physical core in a best-case scenario
+- Process: provides the resources needed to execute a program. Has the following:
+  - Virtual address space
+  - System objects handles
+  - Security context
+  - Unique process identifier
+  - Environment variables
+  - Priority class
+  - At least one thread of execution (primary thread)
+- Thread: entity within a process that can be scheduled for execution
+  - All threads of a process share the same virtual address space and system resources
+  - Each thread maintains its own:
+    - Exception handlers
+    - Scheduling priority
+    - Thread local storage
+    - Unique thread identifier
+    - Thread context
+    - Security context (optional. To impersonate clients)
+- Process context switching is much less efficient than thread context switching
+- Process management: platform-dependent. For \*unix: `fork()`, `std::system`, `exec()`, PID, etc
+- Thread management: `std::thread` and `std::jthread`
+
+## Concurrency (async)
+
+## IPC (Interprocess Communication)
+
+## File Management
+
+## Smart Pointer
+- Automate the free-ing of allocated memory
+- Scope (unique) pointer: `std::unique_ptr<>` and `std::make_unique<>`
+- Shared & weak pointer: `std::shared_ptr<>`, `std::weak_ptr<>` and `std::make_shared<>`
+  - Weak pointer: doesn't increment ref count
+
+## Copying, Copy Constructor & Move Semantics
+- Copying: when a object is assigned (`=`) to another object of the same type. Or when a function is called (argument passed by value)
+- Default copy constructor: shallow copy - copy all values of all class fields (basically `memcpy()` the whole object)
+- Let copy constructor = `delete` to ban copying
+
+```c++
+void Print(const std::string& str) {  // Prevent copying and also allow rvalues to be passed into the func
+  // ...
+}
+```
+
+```c++
+class Entity {
+  Entity(const Entity& other) {
+    // ...
+  }
+};
+```
+
+## Iterator
+
+## Casting & Virtual Function Table
+- Polymorphism: e.g. a `Pawn` is also a `ChessPiece`
+- Dynamic dispatch
+
+## Types
+- Size of each type (e.g. `int`) depends on the compiler
+- `size_t`: a `typedef` (alias) for some unsigned (integer) type (either `uchar`, `ushort`, `uint`, `ulong` or `ulonglong`). E.g. on 64-bit system `size_t` will likely to be 8 bytes
+- All primitive (integer) data types are just numbers. `char a = 65` will print out `A` when passed to `std::cout`
+- Floating point primitives: `float` and `double`. By default decimal rvalues are `double`. Suffix with `f` to make it `float`
+- `bool`: usually 1 byte (same as `char`)
+
+## Enum
+- 4 bytes integer by default, can be explicitly set to `uchar` to save space
+- Not a namespace in itself (unlike class/struct)
+
+```c++
+enum Level : uchar {
+  Error = 0,
+  Warning,
+  Info
+};
+
+Level logLevel = Error;  // Add extra compiler checkings by giving it the type "Level"
+                         // But it is just uchar underneath
+```
+
+## Visibility
+- Specifier: `private`, `public`, `protected`
+- `friend`: able to access the private members of the class by appending the function declaration inside the class and prefix it with `friend`
+
+## Array
+- Array = pointer
+- `array[2]` = `*(array + 2)` = `*(int*)((char*)array + 8)` (if array is `int*`)
+- Cannot reliably find size of array if allocated on heap
+- `std::array`: incl. bound checking + keep track of size of array
+
+## String
+- String literal: `"some string"`. Create a `const char[]` with `\0` appended at the end ; Always stored in read-only memory
+- utf8 by default (1 byte per character)
+- `const char16_t[]` (`std::u16string`) using `u"some string"` and `const char32_t` (`std::u32string`) using `U"some string"`
+- Raw string `R"(some string)"`
+
+## Singleton
+- Only 1 instance exists
+
+```c++
+class Singleton {
+public:
+  static Singleton& Get() {
+    static Singleton instance;
+    return instance;
+  }
+};
+
+int main() {
+  Singleton::Get();
+  return 0;
+}
+```
+
+## Function Pointers, Anonymous Functions & Lambdas
+
+## Timing
