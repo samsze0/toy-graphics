@@ -137,6 +137,25 @@ void _set_name(char* name) {
 - Process management: platform-dependent. For \*unix: `fork()`, `std::system`, `exec()`, PID, etc
 - Thread management: `std::thread` and `std::jthread`
 
+```c++
+void DoWork() {
+  // ...
+  // std::this_thread for giving commands to current thread
+
+  using namespace std::literals::chrono_literals;  // providing "s" as unit
+
+  std::cout << std::this_thread::get_id() << std::endl;
+  std::this_thread::sleep_for(1s);
+}
+
+int main() {
+  std::thread worker(DoWork);  // Construct (and starts) worker by passing in function pointer
+  worker.join();  // block current thread until worker thread finishes
+                  // and collect its return status
+  return 0;
+}
+```
+
 ## Concurrency (async)
 
 ## IPC (Interprocess Communication)
@@ -153,6 +172,7 @@ void _set_name(char* name) {
 - Copying: when a object is assigned (`=`) to another object of the same type. Or when a function is called (argument passed by value)
 - Default copy constructor: shallow copy - copy all values of all class fields (basically `memcpy()` the whole object)
 - Let copy constructor = `delete` to ban copying
+- Prevent copying by assigning it to a ref e.g. `Entity& e2 = e1;`
 
 ```c++
 void Print(const std::string& str) {  // Prevent copying and also allow rvalues to be passed into the func
@@ -179,6 +199,7 @@ class Entity {
 - `size_t`: a `typedef` (alias) for some unsigned (integer) type (either `uchar`, `ushort`, `uint`, `ulong` or `ulonglong`). E.g. on 64-bit system `size_t` will likely to be 8 bytes
 - All primitive (integer) data types are just numbers. `char a = 65` will print out `A` when passed to `std::cout`
 - Floating point primitives: `float` and `double`. By default decimal rvalues are `double`. Suffix with `f` to make it `float`
+- Long: suffix with `L`
 - `bool`: usually 1 byte (same as `char`)
 
 ## Enum
@@ -232,4 +253,65 @@ int main() {
 
 ## Function Pointers, Anonymous Functions & Lambdas
 
+```c++
+void Print(int value) {
+  // ...
+}
+
+// C way of declaring function pointer
+void ForEach(const std::vector<int>& values, void(*func)(int)) {
+  // the function is named func and takes int as argument and return void
+  for (int value : values)
+    func(value);
+}
+
+// C++ way of declaring function pointer
+void ForEach(const std::vector<int>& values, const std::function<void(int)>& func) {
+  // ...
+}
+
+int main() {
+  std::vector vec = { 1, 2, 3, 4, 5 };
+  ForEach(vec, Print);
+  ForEach(vec, [](int value){  // with lambda:
+                               // captures (capturing outside variable by value or by ref),
+                               // parameters,
+                               // (optionally return type,)
+                               // body
+    // ...
+  });
+  return 0;
+}
+```
+
 ## Timing
+- `std::chrono` for timing in c++ instead of relying on platform-specific API
+
+```c++
+int main() {
+  auto start = std::chrono::high_resolution_clock::now();
+  // ...
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<float> duration = end - start;
+}
+```
+
+## Casting (Explicit Type Conversion) & Type Punning
+- Type punning: get around type system by e.g. `*(Entity*)(&e)`
+- C style cast: using e.g. `(int)value`. Basically doing type punning, with some extra compiler checks
+- C++ style cast (subdividing what C style cast can do)
+  - Static cast: `static_cast<int>(value)`. Basically = type punning
+  - Reinterpret cast: reinterpret the memory as something else. E.g. `reinterpret_cast<Entity*>(&e)`
+  - Dynamic cast: cast at runtime. Figure out what super-type the entity is. Require RTTI (runtime type information and hence extra overhead)
+  - Const cast: adding/removing `const`
+
+```c++
+int main() {
+  Base* e = new Super();
+  Super* e2 = dynamic_cast<Super*>(e)
+  if (e2) {  // If e can be dynamically cast to Super*
+    // ...
+  }
+  return 0;
+}
+```
