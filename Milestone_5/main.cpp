@@ -54,13 +54,7 @@ static bool show_stats = true;
 
 static ImVec4 clear_color = ImVec4(75.0f/256.0f, 114.0f/256.0f, 154.0f/256.0f, 1.00f);
 
-static void mouse_callback(GLFWwindow* window, double mouse_pos_x, double mouse_pos_y) {
-	// Doesn't work to include show_menu logic here
-	// Seem like unable to synchronise key_callback and mouse_callback
-	// Race between mouse_callback and key_callback (when escape is pressed)
-	// if (show_menu)
-	// 	return;
-
+static void viewport_mouse_callback(GLFWwindow* window, double mouse_pos_x, double mouse_pos_y) {
 	if (first_mouse) {
 		last_mouse_pos_x = mouse_pos_x;
 		last_mouse_pos_y = mouse_pos_y;
@@ -70,11 +64,25 @@ static void mouse_callback(GLFWwindow* window, double mouse_pos_x, double mouse_
 	double x_offset = mouse_pos_x - last_mouse_pos_x;
 	double y_offset = last_mouse_pos_y - mouse_pos_y;  // reversed: y ranges bottom to top
 
-	// if (!show_menu)
 	camera.Look(x_offset, y_offset);
 
 	last_mouse_pos_x = mouse_pos_x;
 	last_mouse_pos_y = mouse_pos_y;
+}
+
+// See
+// https://stackoverflow.com/questions/71680516/how-do-i-handle-mouse-events-in-general-in-imgui-with-glfw
+// https://github.com/ocornut/imgui/blob/master/docs/FAQ.md#q-how-can-i-tell-whether-to-dispatch-mousekeyboard-to-dear-imgui-or-my-application
+static void mouse_pos_callback(GLFWwindow* window, double mouse_pos_x, double mouse_pos_y) {
+  // (1) ALWAYS forward mouse data to ImGui! This is automatic with default backends. With your own backend:
+  ImGuiIO& io = ImGui::GetIO();
+  io.AddMousePosEvent(mouse_pos_x, mouse_pos_y);
+
+  // (2) ONLY forward mouse data to your underlying app/game.
+  // if (!io.WantCaptureMouse)
+    // mouse_callback(window, mouse_pos_x, mouse_pos_y);
+  if (!show_menu)
+  	viewport_mouse_callback(window, mouse_pos_x, mouse_pos_y);
 }
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -84,25 +92,33 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	ImGuiIO& io = ImGui::GetIO();
+
 	if (key == GLFW_KEY_P && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
 	// Cause stutter because it is asynchronous?
+	// Should be avoided for character movement
 	// if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
 	// 	camera.MoveForward(deltaTime);
 
-	// Doesn't work with imgui because GLFW_CURSOR_DISABLED and glfwSetCursorPosCallback messes up the cursor
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		if (show_menu) {
-			// Restore to previous cursor position once exit menu
-			// glfwSetCursorPos(window, last_mouse_pos_x, last_mouse_pos_y);
+		if (show_menu) {  // To close menu
 			first_mouse = true;
 			// Capture mouse cursor: hide cursor and keep it stays at center of window
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			glfwSetCursorPosCallback(window, mouse_callback);
-		} else {
+			// io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+			// io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+
+			// Let ImGui capture mouse if cursor is hovering any ImGui window
+			// io.WantCaptureMouse = false;
+			// ImGui::SetNextFrameWantCaptureMouse(false);
+		} else {  // To open menu
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			glfwSetCursorPosCallback(window, nullptr);
+			// io.ConfigFlags &= !ImGuiConfigFlags_NoMouse;
+
+			// io.WantCaptureMouse = true;
+			// ImGui::SetNextFrameWantCaptureMouse(true);
 		}
 		show_menu = !show_menu;
 	}
@@ -176,7 +192,7 @@ static void RenderLoop(VertexArray& vertexArray, Shader& shader) {
     ImGui::NewFrame();
 
    	// UI::Demo(show_menu);
-   	UI::Menu(show_menu, show_stats, camera, clear_color, window_width, window_height);
+   	UI::Menu(show_menu, show_stats, camera, clear_color);
    	UI::Stats(show_stats, deltaTime, window_width, window_height, last_mouse_pos_x, last_mouse_pos_y);
 
     // Imgui Rendering
@@ -215,9 +231,10 @@ int main(void)
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);  // Enable transparency
 
 	// OSX specific window hints
-	glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
+	// !! For some reason enabling it cause viewport size to be doubled of its actual dimension
+	glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 
-	// Window icon
+	// !! Window icon
 	// GLFWimage images[2];
 	// images[0] = load_icon("my_icon.png");
 	// images[1] = load_icon("my_icon_small.png");
@@ -233,11 +250,12 @@ int main(void)
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	// glfwSwapInterval(1); // Enable vsync
 
-	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetCursorPosCallback(window, mouse_pos_callback);
 
 	// Setup Dear ImGui context
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
+  IMGUI_CHECKVERSION();  // check ABI compatibility by verifying version and data layout (struct) are the same
+  											 // but we are compiling the source ourselves so this doesn't matter
+  ImGui::CreateContext();  // !! related to Context and Memory Allocators. Globals and heap are not shared across DLL boundaries
   ImGuiIO& io = ImGui::GetIO();
 
   // Setup Platform/Renderer backends

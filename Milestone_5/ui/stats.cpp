@@ -25,6 +25,10 @@ void UI::Stats(bool& show_stats, float deltaTime, float main_window_width, float
     ImGui::Text("[UI frame rate] %.1f frame/s", ImGui::GetIO().Framerate);
     ImGui::Text("[UI delta time] %.3f ms/frame", 1000.0f / ImGui::GetIO().Framerate);
     ImGui::Text("[Main window dimension] %.0f x %.0f", main_window_width, main_window_height);
+
+    auto io = ImGui::GetIO();
+    ImGui::Text("[Main window dimension ImGUI] %.0f x %.0f", io.DisplaySize.x, io.DisplaySize.y);
+
     ImGui::Text("[Cursor position] %.0f x %.0f", last_mouse_pos_x, last_mouse_pos_y);
     ImGui::End();
   }
