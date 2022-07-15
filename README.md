@@ -2,14 +2,13 @@ Wishing to toy with the following
 - CMake
 - C++
 - OpenGL
+- CI (Continuous Integration), Jenkins & commit hooks
 
 TODO
 - CMake visibility options
 - OpenGL texture. Loading/alignment
 - C++ template specialisation & good practice
-- C++ filestream, stringstream
-- C++ smart pointer
-- C++ copy constructor, move semantics
+- OSX retina display resolution and density problem
 
 Resources
 - CMake official docs
@@ -25,6 +24,13 @@ Resources
 - [Stackoverflow - process vs thread](https://stackoverflow.com/questions/200469/what-is-the-difference-between-a-process-and-a-thread)
 - [Wikipedia - dynamic dispatch](https://en.wikipedia.org/wiki/Dynamic_dispatch)
 - [Wikipedia - virtual function table](https://en.wikipedia.org/wiki/Virtual_method_table)
+- [LLDB guide](https://lldb.llvm.org/use/tutorial.html)
+- [DAP](https://microsoft.github.io/debug-adapter-protocol/)
+- [Sublime debugger](https://github.com/daveleroy/sublime_debugger)
+- [Stackoverflow - std::async vs std::thread](https://stackoverflow.com/questions/66803430/stdasync-vs-thread)
+- [Stackoverflow - ifstream vs ofstream vs fstream and the stream hierarchy](https://stackoverflow.com/questions/67631098/what-is-the-difference-between-ifstream-ofstream-and-fstream)
+- [Wikipedia on Standard streams](https://en.wikipedia.org/wiki/Standard_streams#Standard_input_(stdin))
+- [Stackoverflow - cross platform IPC](https://stackoverflow.com/questions/60649/cross-platform-ipc)
 
 # Computer Graphics Basics
 
@@ -157,10 +163,20 @@ int main() {
 ```
 
 ## Concurrency (async)
+- Implemented using thread pool behind the scene
+- `std::thread` is the traditional POSIX thread style way of asynchronous programming
+- Futures (or Promises or Tasks) and async/await is a pattern many languages use nowadays that makes asynchronous program much more maintainable
+- `std::async(std::Launch::async, someFunction)`. Return `std::future<void>` (assuming return type of function is `void`)
+- `std::mutex myMutex`
+- `std::Lock_guard<std::mutex> lock(myMutex, arg1, arg2, ...)`. Work via RAII (Resource Acquisition Is Initialization): acquisition of a resource is tied to the object lifetime
 
 ## IPC (Interprocess Communication)
 
-## File Management
+## Streams
+- `fstream`, `ifstream`, `ostream` for file streams
+- `istream`, `ostream`, `iostream` for standard streams
+- `istringstream`, `ostringstream`, `stringstream` for string streams
+- file stream inherits from standard streams, string stream inherits from file streams
 
 ## Smart Pointer
 - Automate the free-ing of allocated memory
@@ -168,11 +184,13 @@ int main() {
 - Shared & weak pointer: `std::shared_ptr<>`, `std::weak_ptr<>` and `std::make_shared<>`
   - Weak pointer: doesn't increment ref count
 
-## Copying, Copy Constructor & Move Semantics
-- Copying: when a object is assigned (`=`) to another object of the same type. Or when a function is called (argument passed by value)
+## Copying, Copy Constructor, Move Constructor & Move Semantics
+- Copying: when an object is assigned (`=`) to another object of the same type (or when an object is constructed using another object of the same type). Or when a function is called (argument passed by value)
 - Default copy constructor: shallow copy - copy all values of all class fields (basically `memcpy()` the whole object)
 - Let copy constructor = `delete` to ban copying
 - Prevent copying by assigning it to a ref e.g. `Entity& e2 = e1;`
+- lvalues: values with locations ; rvalues: temporary values
+- Move constructor: when an object is assigned to another object of the same type which is temporary (e.g. `Entity&&`) (or when an object is constructed using another object of the same type which is temporary).
 
 ```c++
 void Print(const std::string& str) {  // Prevent copying and also allow rvalues to be passed into the func
@@ -182,13 +200,77 @@ void Print(const std::string& str) {  // Prevent copying and also allow rvalues 
 
 ```c++
 class Entity {
-  Entity(const Entity& other) {
+  Entity() {  // Default constructor
+    // ...
+  }
+
+  Entity(const Entity& other) {  // Copy constructor
+    // ...
+  }
+
+  Entity(Entity&& other) {  // Move constructor
+    // other will need to be casted into temporary again if further functions that take rvalue ref were to be invoked
     // ...
   }
 };
+
+int main() {
+  Entity e1;  // Invoke with default constructor
+  Entity e2(e1);  // Invoke with copy constructor
+  Entity e3((Entity&&)e1);  // Invoke with move constructor, as e is casted into rvalue
+  Entity e3(std::move(e1));  // Same as above. Method using template.
+  return 0;
+}
+```
+
+```c++
+void Print(std::string& myStr) {  // 1. lvalue ref can bound to only lvalue
+  // ...
+}
+
+void Print(const std::string& myStr) {  // 2. lvalue ref can bound to both lvalue & rvalue
+  // ...
+}
+
+void Print(std::string&& myStr) {  // 3. rvalue ref can bound to only rvalue
+  // ...
+}
+
+/* Speciality rule: 3rd or 1st function overload precede 2nd */
+
+int main() {
+  std::string myStr = "some string";
+  Print(myStr);  // lvalue as arg
+  Print("some string");  // rvalue as arg
+  Print(myStr + myStr);  // rvalue as arg
+  return 0;
+}
 ```
 
 ## Iterator
+
+```c++
+int main() {
+  std::vector<int> values = { 1, 2, 3 };
+
+  for (int val : values) {  // Range-based for loop. Based on iterator
+    // ...
+  }
+
+  for (std::vector<int>::iterator it = values.begin() ; it != values.end() ; it++) {
+    // Full-version of above
+    // ++ and * are overloaded
+    // ...
+    // *it
+  }
+
+  for (auto [key,value] : map) {  // With structured binding
+    // ...
+  }
+
+  return 0;
+}
+```
 
 ## Casting & Virtual Function Table
 - Polymorphism: e.g. a `Pawn` is also a `ChessPiece`
@@ -311,6 +393,66 @@ int main() {
   Super* e2 = dynamic_cast<Super*>(e)
   if (e2) {  // If e can be dynamically cast to Super*
     // ...
+  }
+  return 0;
+}
+```
+
+## Debugger
+- Debugger adapter protocol: standardise how debug tooling of IDE communicate with debugger
+- Debug adapter: adapt existing debuggers to the DAP
+
+## Structured Binding
+- C++17 feature
+
+```c++
+std::tuple<std::string, int> CreateTuple() {
+  return { "Some String", 10 };
+}
+
+int main() {
+  auto[myStr, myInt] = CreateTuple();
+  return 0;
+}
+```
+
+## Optional Type
+- C++17 feature
+
+```c++
+int main() {
+  std::optional<std::string> data = ReadFileAsString("data.txt");
+  // if (data) {  // also work
+  if (data.has_value()) {
+    // data behave like a smart pointer
+    // data->...
+    // std::string& myStr = *data;
+    // std::string& myStr = data.value();
+  }
+  return 0;
+}
+```
+
+## Variant Type
+- `std::variant<>` (c++ style) or `Union` (c style)
+- `Union`'s size is the size of its biggest member
+- `std::variant<>`'s size is the total size of its members (like a struct)
+- `std::variant` is type safe and no undefined behaviour (the edge cases that the specification of C++ doesn't specify. Up to compiler to decide)
+
+```c++
+int main() {
+  // Union
+  Union {
+    std::string myStr;
+    int myInt;
+  };
+
+  // std::variant
+  std::variant<std::string, int> data;
+  // ...
+  auto value = std::get_if<std::string>(&data);  // return ptr to data. nullptr if data is not of type std::string
+  if (value) {
+    // std::string& myStr = *value;
   }
   return 0;
 }
