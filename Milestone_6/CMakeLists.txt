@@ -41,10 +41,12 @@ add_executable(myexe
   model/vertexData.h
   model/translationList.cpp
   model/translationList.h
+  logger.cpp
+  logger.h
 )
 
 # External dependencies (dynamic)
-find_package(GLEW REQUIRED)
+# find_package(GLEW REQUIRED)
 
 # External dependencies (static)
 add_subdirectory(external/glfw)
@@ -52,6 +54,7 @@ add_subdirectory(external/glad)
 add_subdirectory(external/stb)
 add_subdirectory(external/glm)
 add_subdirectory(external/imgui)
+add_subdirectory(external/spdlog)
 
 
 # Link lib to main
@@ -62,6 +65,7 @@ target_link_libraries(myexe
     stb
     glm
     imgui
+    spdlog
 )
 
 # Such that include path is independent of project structure
@@ -73,6 +77,7 @@ target_include_directories(myexe
     external/glm/
     external/imgui/
     external/imgui/backends/
+    external/spdlog/
 )
 
 # See

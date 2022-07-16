@@ -32,9 +32,10 @@ static float last_frame = 0.0f;
 static float deltaTime;
 
 static GLFWwindow* window = nullptr;
-// Possible to initialise with NULL? (NULL constructor?)
+// TODO: Optional type and initialise with null. Init all of them in a single Init() function
 static Renderer renderer;
 static Camera camera;
+static Logger logger("main");
 
 static bool show_menu = false;
 static bool show_stats = true;
@@ -120,6 +121,7 @@ static void RenderLoop(VertexArray& vertexArray, Shader& shader) {
 		deltaTime = (current_frame - last_frame) * 1000;
 		// std::cout << "[Delta time (ms)] " << deltaTime << std::endl;
 		// std::cout << "[Frame rate] " << 1 / (deltaTime*0.001) << std::endl;
+		WARN(logger, "[Delta time (ms)] {0}", deltaTime);
 
 		// Process events e.g. keyboard
 		glfwPollEvents();

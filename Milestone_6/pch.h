@@ -1,5 +1,4 @@
-#ifndef PCH_H
-#define PCH_H
+#pragma once
 
 #include <iostream>
 #include <glad/glad.h>
@@ -23,5 +22,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <cassert>
+#include <memory>
 
-#endif
+#include "logger.h"
