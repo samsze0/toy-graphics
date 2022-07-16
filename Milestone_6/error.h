@@ -1,6 +1,5 @@
 # pragma once
 
-#include <cassert>
 #include "pch.h"
 
 #define GLCheckError(x) \

@@ -1,10 +1,6 @@
 #include "vertexArray.h"
-#include <glad/glad.h>
 #include "error.h"
 #include "vertexBuffer.h"
-#include <iostream>
-#include <memory>
-#include <glad/glad.h>
 
 
 VertexArray::VertexArray(const void* vertexData, unsigned int size, const VertexAttribVector& vertexAttribVector)
@@ -19,14 +15,14 @@ VertexArray::VertexArray(const void* vertexData, unsigned int size, const Vertex
 
   // For calculating stride
   this->stride = vertexAttribVector.GetStride();
-  std::cout << "Stride: " << this->stride << std::endl;
+  INFO("[Vertex Array] Stride:{0}", this->stride);
 
   // For calculuating offset
   std::vector<VertexAttrib> elements = vertexAttribVector.GetElements();
   for (unsigned int i = 0; i < elements.size(); i++) {
     VertexAttrib vertexAttrib = elements[i];
 
-    std::cout << "Vertex Attrib " << i << " Offset: " << this->offset << std::endl;
+    INFO("[Vertex Attrib] Index:{0} Offset:{1}", i, this->offset);
 
     GLCheckError(glVertexAttribPointer(i, vertexAttrib.count, GL_FLOAT, GL_FALSE, vertexAttribVector.GetStride(), (void*)(size_t)(this->offset)));
     GLCheckError(glEnableVertexAttribArray(i));

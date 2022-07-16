@@ -1,7 +1,5 @@
 #include "renderer.h"
 #include "error.h"
-#include <iostream>
-#include <glad/glad.h>
 
 
 void Renderer::Init() const {

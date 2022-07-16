@@ -1,6 +1,4 @@
 #include "vertexAttribVector.h"
-#include <glad/glad.h>
-#include <iostream>
 
 
 VertexAttribVector::VertexAttribVector() {}
@@ -13,10 +11,12 @@ unsigned int VertexAttribVector::GetStride() const {
   return this->stride;
 }
 
+// See enforcing template type through static assert
+// https://stackoverflow.com/questions/17679268/enforce-template-type-through-static-assert
 template<typename T>
 void VertexAttribVector::Push(unsigned int count, bool normalise) {
-  // static_assert(false);  // throw exception at compile time
-  std::cout << "static_assert(false);" << std::endl;
+  // static_assert(false);  // !!throw exception at compile time
+  static_assert(sizeof(T) == 0, "Template type is enforced");
 }
 
 template<>

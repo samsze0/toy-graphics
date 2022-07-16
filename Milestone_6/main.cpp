@@ -35,7 +35,7 @@ static GLFWwindow* window = nullptr;
 // TODO: Optional type and initialise with null. Init all of them in a single Init() function
 static Renderer renderer;
 static Camera camera;
-static Logger logger("main");
+// static Logger logger("main");
 
 static bool show_menu = false;
 static bool show_stats = true;
@@ -119,9 +119,8 @@ static void RenderLoop(VertexArray& vertexArray, Shader& shader) {
 	while (!glfwWindowShouldClose(window)) {
 		float current_frame = glfwGetTime();
 		deltaTime = (current_frame - last_frame) * 1000;
-		// std::cout << "[Delta time (ms)] " << deltaTime << std::endl;
-		// std::cout << "[Frame rate] " << 1 / (deltaTime*0.001) << std::endl;
-		WARN(logger, "[Delta time (ms)] {0}", deltaTime);
+		// INFO("[Delta time (ms)] {0}", deltaTime);
+		// INFO("[Frame rate] {0}", 1 / (deltaTime*0.001));
 
 		// Process events e.g. keyboard
 		glfwPollEvents();
@@ -190,6 +189,8 @@ static void RenderLoop(VertexArray& vertexArray, Shader& shader) {
 
 int main(void)
 {
+	Logger::Init();
+
 	// Initialise GLFW
 	if (!glfwInit())
 		throw std::runtime_error("GLFW: fail to initialise");

@@ -1,5 +1,3 @@
-#include <glad/glad.h>
-#include <iostream>
 #include "error.h"
 
 
@@ -12,7 +10,7 @@ bool GLGetError(const char* function, const char* file, int line) {
 
   while (GLenum error = glGetError()) {
     no_error = false;
-    std::cout << "[OpenGL Error] (" << error << ")" << function << " " << file << ":" << line << std::endl;
+    ERROR("[OpenGL] ({0}){1} {2}:{3}", error, function, file, line);
   }
   return no_error;
 }

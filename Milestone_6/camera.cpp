@@ -31,41 +31,41 @@ glm::mat4 Camera::GetProjectionMatrix(float aspect_ratio) const {
 void Camera::MoveLeft(float deltaTime) {
   // Cross product: z * x = y
   // Move to left (hence the opposite of right vector)
-  std::cout << "[Camera] Move left" << std::endl;
+  INFO("[Camera] Move left");
   // this->pos -= glm::normalize(glm::cross(this->target - this->pos, this->up)) * this->speed * deltaTime;
   this->pos -= glm::normalize(glm::cross(this->lookAt, this->up)) * this->speed * deltaTime;
 }
 
 void Camera::MoveRight(float deltaTime) {
-  std::cout << "[Camera] Move right" << std::endl;
+  INFO("[Camera] Move right");
   // this->pos += glm::normalize(glm::cross(this->target - this->pos, this->up)) * this->speed * deltaTime;
   this->pos += glm::normalize(glm::cross(this->lookAt, this->up)) * this->speed * deltaTime;
 }
 
 void Camera::MoveForward(float deltaTime) {
-  std::cout << "[Camera] Move forward" << std::endl;
+  INFO("[Camera] Move forward");
   // this->pos += glm::normalize(this->target - this->pos) * this->speed * deltaTime;
   this->pos += glm::normalize(this->lookAt) * this->speed * deltaTime;
 }
 
 void Camera::MoveBack(float deltaTime) {
-  std::cout << "[Camera] Move back" << std::endl;
+  INFO("[Camera] Move back");
   // this->pos -= glm::normalize(this->target - this->pos) * this->speed * deltaTime;
   this->pos -= glm::normalize(this->lookAt) * this->speed * deltaTime;
 }
 
 void Camera::MoveUp(float deltaTime) {
-  std::cout << "[Camera] Move up" << std::endl;
+  INFO("[Camera] Move up");
   this->pos += this->up * this->speed * deltaTime;
 }
 
 void Camera::MoveDown(float deltaTime) {
-  std::cout << "[Camera] Move down" << std::endl;
+  INFO("[Camera] Move down");
   this->pos -= this->up * this->speed * deltaTime;
 }
 
 void Camera::Look(double x_offset, double y_offset) {
-  std::cout << "[Camera] Look x_offset " << x_offset << " y_offset " << y_offset << std::endl;
+  INFO("[Camera] Look x_offset {0} y_offset {1}", x_offset, y_offset);
 
   this->yaw += x_offset * this->sensitivity;
 

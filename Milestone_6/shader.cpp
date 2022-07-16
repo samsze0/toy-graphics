@@ -68,7 +68,7 @@ Shader::~Shader() {
 
 int Shader::GetUniformLocation(const std::string& name) {
   if (this->UniformLocationCache.find(name) != UniformLocationCache.end())
-    // std::cout << "Retrieve uniform " << name << " from cache" << std::endl;
+    // INFO("[Shader] Retrieve uniform {0} from cache", name);
     return UniformLocationCache[name];
 
   GLCheckError(int location = glGetUniformLocation(this->ID, (const char*)&name));
