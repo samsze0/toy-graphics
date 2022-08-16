@@ -271,7 +271,7 @@ int main(void)
 	VertexArray vertexArray = VertexArray((void*)vertexData, 6*6 * vertexAttribVector.GetStride(), vertexAttribVector);
 
 	// Shader
-	Shader shader = Shader("shader/vertex.vs", "shader/fragment.fs");
+	Shader shader = Shader("src/shader/vertex.vs", "src/shader/fragment.fs");
 
 	// Texture
 	Texture texture1("asset/opengl.png", 0);

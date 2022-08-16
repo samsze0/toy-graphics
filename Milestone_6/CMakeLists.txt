@@ -8,41 +8,44 @@ project(
 
 set (CMAKE_CXX_STANDARD 11)
 
+# See hard-coded source file vs GLOB
+# https://stackoverflow.com/questions/1027247/is-it-better-to-specify-source-files-with-glob-or-each-file-individually-in-cmak
+
 # Compile to exe, with all source files
 add_executable(myexe
-  main.cpp
-  shader.cpp
-  shader.h
-  error.cpp
-  error.h
-  vertexBuffer.cpp
-  vertexBuffer.h
-  indexBuffer.cpp
-  indexBuffer.h
-  vertexArray.cpp
-  vertexArray.h
-  vertexAttrib.cpp
-  vertexAttrib.h
-  vertexAttribVector.cpp
-  vertexAttribVector.h
-  renderer.cpp
-  renderer.h
-  texture.cpp
-  texture.h
-  camera.cpp
-  camera.h
-  ui/demo.cpp
-  ui/demo.h
-  ui/menu.cpp
-  ui/menu.h
-  ui/stats.cpp
-  ui/stats.h
-  model/vertexData.cpp
-  model/vertexData.h
-  model/translationList.cpp
-  model/translationList.h
-  logger.cpp
-  logger.h
+  src/main.cpp
+  src/shader.cpp
+  src/shader.h
+  src/error.cpp
+  src/error.h
+  src/vertexBuffer.cpp
+  src/vertexBuffer.h
+  src/indexBuffer.cpp
+  src/indexBuffer.h
+  src/vertexArray.cpp
+  src/vertexArray.h
+  src/vertexAttrib.cpp
+  src/vertexAttrib.h
+  src/vertexAttribVector.cpp
+  src/vertexAttribVector.h
+  src/renderer.cpp
+  src/renderer.h
+  src/texture.cpp
+  src/texture.h
+  src/camera.cpp
+  src/camera.h
+  src/ui/demo.cpp
+  src/ui/demo.h
+  src/ui/menu.cpp
+  src/ui/menu.h
+  src/ui/stats.cpp
+  src/ui/stats.h
+  src/model/vertexData.cpp
+  src/model/vertexData.h
+  src/model/translationList.cpp
+  src/model/translationList.h
+  src/logger.cpp
+  src/logger.h
 )
 
 # External dependencies (dynamic)
@@ -84,5 +87,5 @@ target_include_directories(myexe
 # https://cmake.org/cmake/help/latest/command/target_precompile_headers.html
 target_precompile_headers(myexe
   PRIVATE
-    pch.h
+    src/pch.h
 )
