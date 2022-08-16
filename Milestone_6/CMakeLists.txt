@@ -46,6 +46,18 @@ add_executable(myexe
   src/model/translationList.h
   src/logger.cpp
   src/logger.h
+  src/event/appEvent.cpp
+  src/event/appEvent.h
+  src/event/event.cpp
+  src/event/event.h
+  src/event/eventDispatcher.cpp
+  src/event/eventDispatcher.h
+  src/event/keyEvent.cpp
+  src/event/keyEvent.h
+  src/event/mouseEvent.cpp
+  src/event/mouseEvent.h
+  src/event/windowEvent.cpp
+  src/event/windowEvent.h
 )
 
 # External dependencies (dynamic)
