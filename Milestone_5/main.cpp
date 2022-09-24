@@ -19,8 +19,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "camera.h"
 #include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#include "bindings/imgui_impl_glfw.h"
+#include "bindings/imgui_impl_opengl3.h"
 #include "ui/demo.h"
 #include "ui/menu.h"
 #include "ui/stats.h"

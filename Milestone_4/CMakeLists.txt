@@ -8,6 +8,9 @@ project(
 
 set (CMAKE_CXX_STANDARD 11)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
 # Compile to exe, with all source files
 add_executable(myexe
   main.cpp
@@ -34,27 +37,28 @@ add_executable(myexe
 )
 
 # External dependencies (dynamic)
-find_package(GLEW REQUIRED)
+# find_package(GLEW REQUIRED)
 
 # External dependencies (static)
-add_subdirectory(external/glfw)
-add_subdirectory(external/glad)
-add_subdirectory(external/stb)
-add_subdirectory(external/glm)
+# add_subdirectory(external/glfw)
+# add_subdirectory(external/glad)
+# add_subdirectory(external/stb)
+# add_subdirectory(external/glm)
 
 
 # Link lib to main
 target_link_libraries(myexe
-  PRIVATE glfw
-  PRIVATE glad
-  PRIVATE stb
-  PRIVATE glm
+  # PRIVATE glfw
+  # PRIVATE glad
+  # PRIVATE stb
+  # PRIVATE glm
+  ${CONAN_LIBS}
 )
 
 # Such that include path is independent of project structure
-target_include_directories(myexe
-  PRIVATE external/glfw/include/
-  PRIVATE external/glad/include/
-  PRIVATE external/stb/include/
-  PRIVATE external/glm/
-)
+# target_include_directories(myexe
+#   PRIVATE external/glfw/include/
+#   PRIVATE external/glad/include/
+#   PRIVATE external/stb/include/
+#   PRIVATE external/glm/
+# )

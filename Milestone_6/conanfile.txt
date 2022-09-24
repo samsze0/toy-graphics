@@ -1,0 +1,19 @@
+[requires]
+glfw/3.3.8  # OS-independent window, input etc library
+glad/0.1.36  # modern alternative to GLEW
+# glew/2.2.0  # hook into system OpenGL
+glm/cci.20220420  # maths
+stb/cci.20210910  # stb_image.h for image loading
+imgui/cci.20220621+1.88.docking  # UI
+spdlog/1.10.0  # logging
+
+[generators]
+cmake
+
+[imports]
+# copy files provided inside imgui to bindings directory
+./res/bindings, imgui_impl_glfw.cpp -> ../bindings
+./res/bindings, imgui_impl_opengl3.cpp -> ../bindings
+./res/bindings, imgui_impl_glfw.h -> ../bindings
+./res/bindings, imgui_impl_opengl3.h -> ../bindings
+./res/bindings, imgui_impl_opengl3_loader.h -> ../bindings

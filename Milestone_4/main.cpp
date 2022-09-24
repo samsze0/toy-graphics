@@ -21,8 +21,8 @@
 #include "camera.h"
 
 
-static float window_width = 640.0f;
-static float window_height = 480.0f;
+static float window_width = 1280.0f;
+static float window_height = 960.0f;
 
 static double last_mouse_pos_x;
 static double last_mouse_pos_y;

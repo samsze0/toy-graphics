@@ -8,6 +8,9 @@ project(
 
 set (CMAKE_CXX_STANDARD 11)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
 # Compile to exe, with all source files
 add_executable(myexe
   main.cpp
@@ -23,6 +26,7 @@ add_subdirectory(
 # Link lib to main
 target_link_libraries(myexe
   mult
+  ${CONAN_LIBS}
 )
 
 # Such that include path is independent of project structure
