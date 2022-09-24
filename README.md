@@ -23,16 +23,16 @@ Milestone1
 
 Milestone2
 
-![Milestone2](./README_assets/milestone2.mov)
+https://user-images.githubusercontent.com/86842365/192091915-6685ae0c-ce41-4040-b3a3-96e3f60d987e.mov
 
 Milestone3
 
-![Milestone3](./README_assets/milestone3.mov)
+https://user-images.githubusercontent.com/86842365/192091933-a3e467d4-e92e-4f9b-b463-ac8335ee6455.mov
 
 Milestone4
 
-![Milestone4](./README_assets/milestone4.mov)
+https://user-images.githubusercontent.com/86842365/192091936-64db24e4-e88a-4e37-9bc5-cb719111588f.mov
 
 Milestone5
 
-![Milestone5](./README_assets/milestone5.mov)
+https://user-images.githubusercontent.com/86842365/192092071-136baa34-2e9f-4738-b48a-6b679fb28919.mov
