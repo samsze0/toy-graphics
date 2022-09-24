@@ -54,3 +54,6 @@ build/
 **/graph_info.json
 
 **/bindings/
+
+README_assets/*
+!README_assets/milestone1.png
