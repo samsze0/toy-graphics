@@ -1,8 +1,10 @@
-# Toy OpenGL
+# Toy Graphics
 
-A toy OpenGL project
+A toy project on Graphics
 
 ## Setup
+
+### Milestone 1-5
 
 Dependencies
 - `Cmake` for generating builds
