@@ -17,15 +17,24 @@ Dependencies
 4. Run `./build.sh`
 5. Run `./execute.sh`
 
-### Milestone (0-1)b (XMake)
+### Milestone (0-5)b (XMake)
 
 Dependencies
 - `Xmake` for generating builds & installing libraries
 - `OpenGL` support on your system
 
 1. Navigate into `Milestone_<x>b`
-2. Run `xmake`
+2. Run `xmake b`
 3. Run `xmake r`
+
+### Milestone (0-5)c (Rust)
+
+Dependencies
+- `Rust`
+
+1. Navigate into `Milestone_<x>c`
+2. Run `cargo build`
+3. Run `cargo run`
 
 ## Showcase
 

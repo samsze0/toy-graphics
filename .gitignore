@@ -56,9 +56,17 @@ build/
 # XMake
 .xmake
 
+# Imgui bindings/backend
 **/bindings/
+!Milestone_5b/bindings/
+!Milestone_6b/bindings/
 
+# Vscode
 .vscode/
 
+# README
 README_assets/*
 !README_assets/milestone1.png
+
+# Cargo
+**/target/

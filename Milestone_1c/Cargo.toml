@@ -1,0 +1,19 @@
+[package]
+name = "myexe"
+version = "0.0.0"
+edition = "2021"
+resolver="2"
+
+[dependencies]
+winit = "0.26"
+env_logger = "0.9"
+log = "0.4"
+wgpu = "0.13"
+
+[lib]
+name = "lib"
+path = "lib.rs"
+
+[[bin]]
+name = "myexe"
+path = "main.rs"
