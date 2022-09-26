@@ -10,8 +10,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
-#include "../bindings/imgui_impl_glfw.h"
-#include "../bindings/imgui_impl_opengl3.h"
+// #include "../bindings/imgui_impl_glfw.h"
+// #include "../bindings/imgui_impl_opengl3.h"
 // #include <imgui_impl_glfw.h>
 // #include <imgui_impl_opengl3.h>
 #include <string>

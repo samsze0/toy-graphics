@@ -53,7 +53,12 @@ build/
 **/conaninfo.txt
 **/graph_info.json
 
+# XMake
+.xmake
+
 **/bindings/
+
+.vscode/
 
 README_assets/*
 !README_assets/milestone1.png

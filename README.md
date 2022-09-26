@@ -4,18 +4,28 @@ A toy project on Graphics
 
 ## Setup
 
-### Milestone 1-5
+### Milestone 0-5 (CMake)
 
 Dependencies
 - `Cmake` for generating builds
 - `Conan` for installing libraries
 - `OpenGL` support on your system
 
-1. Navigate into `Milestone_x`
+1. Navigate into `Milestone_<x>`
 2. Give the following 3 scripts execute permission
 3. Run `./configure.sh`
 4. Run `./build.sh`
 5. Run `./execute.sh`
+
+### Milestone (0-1)b (XMake)
+
+Dependencies
+- `Xmake` for generating builds & installing libraries
+- `OpenGL` support on your system
+
+1. Navigate into `Milestone_<x>b`
+2. Run `xmake`
+3. Run `xmake r`
 
 ## Showcase
 
