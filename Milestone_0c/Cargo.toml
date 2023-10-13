@@ -1,9 +1,0 @@
-[package]
-name = "myexe"
-version = "0.0.0"
-
-[dependencies]
-
-[[bin]]
-name = "myexe"
-path = "main.rs"
